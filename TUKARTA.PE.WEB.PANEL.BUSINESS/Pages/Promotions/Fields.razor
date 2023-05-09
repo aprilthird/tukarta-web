@@ -1,0 +1,68 @@
+﻿@using BlazorInputFile
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="dish_category">Platos</label>
+            <RadzenDropDown @bind-Value="Promotion.DishId" id="dish_category" TValue="Guid" Data="Dishes" TextProperty="Name" ValueProperty="Id" class="form-control" Placeholder="Platos" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Change="UpdateDishAndDiscount" />
+            <ValidationMessage For="() => Promotion.DishId" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="dish_price">Precio del Plato</label>
+            <InputText id="dish_price" @bind-Value="@DishPrice" class="form-control" placeholder="Precio del Plato" disabled />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="price">Nuevo Precio (Promoci&oacute;n)</label>
+            <RadzenNumeric id="price" @bind-Value="Promotion.NewPrice" TValue="double" Change="UpdateDishAndDiscount" Placeholder="Precio" class="form-control" />
+            @*<InputNumber @bind-Value="Promotion.NewPrice"  id="price" class="form-control" placeholder="Precio" />*@
+            <ValidationMessage For="() => Promotion.NewPrice" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="discount">Descuento</label>
+            <InputText id="discount" @bind-Value="@Discount" class="form-control" placeholder="Descuento" disabled />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="description">Fecha de caducidad</label>
+            <RadzenDatePicker @bind-Value="Promotion.ExpirationDateTime" id="expirationdatetime" placeholder="Fecha de caducidad" style="width: 100%" />
+            <ValidationMessage For="() => Promotion.ExpirationDateTime" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public IEnumerable<DishResource> Dishes { get; set; }
+
+    [Parameter]
+    public PromotionResource Promotion { get; set; }
+
+    private string DishPrice;
+    private string Discount;
+
+    private void UpdateDishAndDiscount()
+    {
+        var dish = Dishes.FirstOrDefault(x => x.Id == Promotion.DishId);
+        if (dish != null)
+        {
+            DishPrice = dish.Price.ToMoney();
+            var result = dish.Price == 0 ? 0 : 1 - (Promotion.NewPrice / dish.Price);
+            Discount = (result * 100).ToPercentage();
+        }
+    }
+}

@@ -1,0 +1,149 @@
+﻿@page "/gestion/categorias-de-platos"
+
+@inject ViewModels.DishCategoriesViewModels.IndexViewModel ViewModel
+@inject IToastService ToastService
+
+<Document Title="Categorías" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3>Categor&iacute;as de Platos</h3>
+                <button class="btn btn-icon btn-brand-primary" @onclick="() => ShowModalAsync(ModalType.New)">
+                    <i class="c-icon cil-plus"></i>
+                    <span>Nuevo</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <RadzenGrid @ref="DataGrid" Data="@ViewModel.DishCategories" TItem="DishCategoryResource" AllowSorting="true" AllowFiltering="true"
+                            AllowPaging="true" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" ColumnWidth="200px">
+                    <Columns>
+                        <RadzenGridColumn TItem="DishCategoryResource" Property="PictureUrl" Title="Imagen" Sortable="false" Filterable="false">
+                            <Template Context="data">
+                                <RadzenImage Path="@data?.PictureUrl?.ToString()" Style="max-width: 100%;" />
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="DishCategoryResource" Property="Name" Title="Nombre" />
+                        <RadzenGridColumn TItem="DishCategoryResource" Property="Description" Title="Descripción" />
+                        <RadzenGridColumn TItem="DishCategoryResource" Property="CreatedAt" Title="Fecha de Creación">
+                            <Template Context="data">
+                                @String.Format("{0:d}", data.CreatedAt)
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="DishCategoryResource" Title="Opciones" Filterable="false" Sortable="false">
+                            <Template Context="data">
+                                <button class="btn btn-icon btn-brand-secondary" @onclick="() => ShowModalAsync(ModalType.Edit, data)">
+                                    <i class="c-icon cil-pencil"></i>
+                                    <span>Editar</span>
+                                </button>
+                                <button class="btn btn-icon btn-danger" @onclick="() => DeleteAsync(data)">
+                                    <i class="c-icon cil-trash"></i>
+                                    <span>Eliminar</span>
+                                </button>
+                            </Template>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ModalForm @ref="Modal" Title="@ModalTitle" Model="ModalDishCategory" ValidSubmitCallback="SaveAsync" InvalidSubmitCallback="ShowError">
+    <Fields @ref="Fields" DishCategory="ModalDishCategory" BeforeFileUpload="BeforeFileUploadAsync" AfterFileUpload="AfterFileUploadAsync"/>
+</ModalForm>
+
+<SweetAlert @ref="Alert" Title="¿Está seguro de eliminar la categoría?" Message="Esta acción es irreversible" ButtonText="Sí, eliminarlo" Type="SweetAlert.DialogType.warning" />
+<SweetAlert @ref="AlertOk" Title="Se eliminó la categoría con éxito" Type="SweetAlert.DialogType.success" />
+<SweetAlert @ref="AlertError" Title="Ha ocurrido un error al tratar de eliminar la categoría" Type="SweetAlert.DialogType.error" />
+
+@code {
+    private DishCategoryResource ModalDishCategory = new DishCategoryResource();
+
+    private RadzenGrid<DishCategoryResource> DataGrid;
+    private ModalForm Modal;
+    private Fields Fields;
+    private string ModalTitle;
+
+    private SweetAlert Alert;
+    private SweetAlert AlertOk;
+    private SweetAlert AlertError;
+
+    public enum ModalType
+    {
+        New, Edit
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync(false);
+    }
+
+    private async Task LoadDataAsync(bool refresh)
+    {
+        await ViewModel.LoadAsync();
+        if (refresh) StateHasChanged();
+    }
+
+    public async Task ShowModalAsync(ModalType modalType, DishCategoryResource dishCategory = null)
+    {
+        ModalTitle = $"{(modalType == ModalType.New ? "Nueva" : "Editar")} Categoría";
+        ModalDishCategory = dishCategory ?? new DishCategoryResource();
+        await Modal.OpenAsync();
+    }
+
+    public async Task SaveAsync()
+    {
+        if (await ViewModel.SaveAsync(ModalDishCategory, Fields.SelectedFile, Fields.FileStream))
+        {
+            ToastService.ShowSuccess(ModalDishCategory.Name, "Registro guardado con éxito");
+            await LoadDataAsync(true);
+            await DataGrid.Reload();
+            await Modal.CloseAsync();
+        }
+        else
+        {
+            ToastService.ShowError(ModalDishCategory.Name, ViewModel.ErrorMessage);
+            await Modal.ShowAlertAsync(ViewModel.ErrorMessage);
+        }
+    }
+
+    public void ShowError()
+    {
+        ToastService.ShowError("Se encontraron errores en el formulario", "Error");
+    }
+
+    public async Task BeforeFileUploadAsync()
+    {
+        await Modal.SubmitButton.ShowLoaderAsync();
+    }
+
+    public async Task AfterFileUploadAsync()
+    {
+        await Modal.SubmitButton.HideLoaderAsync();
+    }
+
+    public async Task DeleteAsync(DishCategoryResource dishCategory)
+    {
+        if (await Alert.ConfirmTaskAsync())
+        {
+            if (await ViewModel.DeleteAsync(dishCategory.Id.Value))
+            {
+                await AlertOk.FireAsync();
+                ToastService.ShowSuccess(dishCategory.Name, "Se eliminó la categoría con éxito");
+                await LoadDataAsync(true);
+            }
+            else
+            {
+                await AlertError.FireAsync(ViewModel.ErrorMessage);
+                ToastService.ShowError(dishCategory.Name, ViewModel.ErrorMessage);
+            }
+        }
+    }
+
+    public void Export(string type)
+    {
+        //service.Export("OrderDetails", type, new Query() { OrderBy = grid.Query.OrderBy, Filter = grid.Query.Filter });
+    }
+}

@@ -1,0 +1,192 @@
+﻿<EditForm @ref="EditForm" EditContext="EditFormContext" OnValidSubmit="OnValidSubmitAsync" OnInvalidSubmit="OnInvalidSubmitAsync">
+    <FluentValidationValidator />
+    <div class="alert alert-danger alert-dismissible fade @AlertDisplayClass" role="alert" style="display:@AlertDisplayCss">
+        <h5 class="alert-heading">Error</h5>
+        <p>@ErrorMessage</p>
+        <button class="close" type="button" @onclick="CloseAlertAsync"><span>×</span></button>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="name">Nombre</label>
+                <div class="input-group">
+                    <span class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="c-icon cil-info" />
+                        </span>
+                    </span>
+                    <InputText @bind-Value="User.Name" id="name" class="form-control" placeholder="Nombre" />
+                </div>
+                <ValidationMessage For="() => User.Name" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="surname">Apellidos</label>
+                <div class="input-group">
+                    <span class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="c-icon cil-info" />
+                        </span>
+                    </span>
+                    <InputText @bind-Value="User.Surname" id="surname" class="form-control" placeholder="Apellidos" />
+                </div>
+                <ValidationMessage For="() => User.Surname" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="birthdate">Fecha de Nacimiento</label>
+                <RadzenDatePicker @bind-Value="User.BirthDate" id="birthdate" placeholder="Fecha de Nacimiento" DateFormat="d" Style="width:100%" />
+                <ValidationMessage For="() => User.BirthDate" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-group">
+                    <span class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="c-icon cil-envelope-closed" />
+                        </span>
+                    </span>
+                    @if (User.IsExternalLogin)
+                    {
+                        <InputText @bind-Value="User.Email" id="email" class="form-control" placeholder="Email" readonly disabled />
+                    }
+                    else
+                    {
+                        <InputText @bind-Value="User.Email" id="email" class="form-control" placeholder="Email" autocomplete="@(User.Id.HasValue ? "on" : "new-password")" />
+                    }
+                </div>
+                <ValidationMessage For="() => User.Email" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="phone_number">Numero de Telefono</label>
+                <div class="input-group">
+                    <span class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="c-icon cil-phone" />
+                        </span>
+                    </span>
+                    <InputText @bind-Value="User.PhoneNumber" id="phone_number" class="form-control" placeholder="Numero de Telefono" />
+                </div>
+                <ValidationMessage For="() => User.PhoneNumber" />
+            </div>
+        </div>
+    </div>
+    @if (!User.IsExternalLogin)
+    {
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="password">Contrase&ntilde;a</label>
+                    <div class="input-group">
+                        <span class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="c-icon cil-lock-locked" />
+                            </span>
+                        </span>
+                        <InputText @bind-Value="User.Password" id="password" type="password" class="form-control" placeholder="Contraseña" autocomplete="@(User.Id.HasValue ? "on" : "new-password")" />
+                    </div>
+                    <ValidationMessage For="() => User.Password" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="repeat_password">Confirmar Contrase&ntilde;a</label>
+                    <div class="input-group">
+                        <span class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="c-icon cil-lock-locked" />
+                            </span>
+                        </span>
+                        <InputText @bind-Value="User.RepeatPassword" id="repeat_password" type="password" class="form-control" placeholder="Confirmar Contraseña" autocomplete="@(User.Id.HasValue ? "on" : "new-password")" />
+                    </div>
+                    <ValidationMessage For="() => User.RepeatPassword" />
+                </div>
+            </div>
+        </div>
+    }
+    <hr />
+    <div class="row">
+        <div class="col-sm-12 d-flex justify-content-end">
+            <div>
+                @if (ReturnToLogin)
+                {
+                    <a class="btn btn-icon btn-secondary" href="/ingresar">
+                        <i class="c-icon cil-arrow-left"></i>
+                        <span>Regresar</span>
+                    </a>
+                }
+                <Button @ref="SubmitButton" Text="Guardar" Icon="c-icon cil-save" />
+            </div>
+        </div>
+    </div>
+</EditForm>
+@code {
+    [Parameter]
+    public UserResource User { get; set; }
+
+    [Parameter]
+    public EventCallback ValidSubmitCallback { get; set; }
+
+    [Parameter]
+    public EventCallback InvalidSubmitCallback { get; set; }
+
+    [Parameter]
+    public bool ReturnToLogin { get; set; } = false;
+
+    private EditForm EditForm;
+    private EditContext EditFormContext;
+    private string ErrorMessage = null;
+    private string AlertDisplayClass = "hide";
+    private string AlertDisplayCss = "none;";
+
+    private Button SubmitButton;
+
+    protected override void OnInitialized()
+    {
+        EditFormContext = new EditContext(User);
+    }
+
+    public async Task OnValidSubmitAsync()
+    {
+        await SubmitButton.ShowLoaderAsync();
+        await ValidSubmitCallback.InvokeAsync(this);
+        await SubmitButton.HideLoaderAsync();
+    }
+
+    private async Task OnInvalidSubmitAsync()
+    {
+        await InvalidSubmitCallback.InvokeAsync(this);
+    }
+
+    public async Task ShowAlertAsync(string message)
+    {
+        ErrorMessage = message;
+        AlertDisplayCss = "block;";
+        await Task.Delay(500);
+        AlertDisplayClass = "show";
+    }
+
+    public async Task CloseAlertAsync()
+    {
+        ErrorMessage = null;
+        AlertDisplayClass = "hide";
+        await Task.Delay(1000);
+        AlertDisplayCss = "none;";
+    }
+}

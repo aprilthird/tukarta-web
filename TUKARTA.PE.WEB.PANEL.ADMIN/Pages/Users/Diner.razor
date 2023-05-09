@@ -1,0 +1,112 @@
+﻿@page "/gestion/comensales"
+
+@inject ViewModels.UsersViewModels.DinerViewModel ViewModel
+@inject IToastService ToastService
+
+<Document Title="Clientes" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3>Usuarios Clientes (Comensales)</h3>
+            </div>
+            <div class="card-body">
+                @*<RadzenButton Text="Nuevo" Icon="grid_on" Click="@(args => Export("excel"))" Style="margin-bottom:20px" />*@
+
+                @*<button class="btn btn-primary" @onclick="New">Nuevo</button>*@
+
+                @*<RadzenButton Text="Excel" Icon="grid_on" Click="@(args => Export("excel"))" Style="margin-bottom:20px" />
+                    <RadzenButton Text="CSV" Icon="wrap_text" Click="@(args => Export("csv"))" Style="margin-left:20px;margin-bottom:20px;" />*@
+
+                <RadzenGrid @ref="DataGrid" Data="ViewModel.Diners" TItem="UserResource" AllowFiltering="true" AllowSorting="true"
+                            AllowPaging="true" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" ColumnWidth="120px">
+                    <Columns>
+                        @*<RadzenGridColumn TItem="ApplicationUser" Property="PictureUrl" Title="Imagen" Sortable="false" Filterable="false">
+                                <Template Context="data">
+                                    <RadzenImage Path="@data?.PictureUrl.ToString()" Style="max-width: 100%;" />
+                                </Template>
+                            </RadzenGridColumn>*@
+                        <RadzenGridColumn TItem="UserResource" Property="RawFullName" Title="Nombres y Apellidos" />
+                        <RadzenGridColumn TItem="UserResource" Property="Email" Title="Correo Electrónico" />
+                        <RadzenGridColumn TItem="UserResource" Property="PhoneNumber" Title="Teléfono" />
+                        <RadzenGridColumn TItem="UserResource" Property="BirthDate" Title="Fecha de Nacimiento">
+                            <Template Context="data">
+                                @String.Format("{0:d}", data.BirthDate)
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="UserResource" Property="CreatedAt" Title="Fecha de Creación">
+                            <Template Context="data">
+                                @String.Format("{0:d}", data.CreatedAt)
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="UserResource" Title="Opciones" Filterable="false" Sortable="false">
+                            <Template Context="data">
+                                @if (data.IsEnabled)
+                                {
+                                    <button class="btn btn-icon btn-danger" @onclick="() => ChangeStatusAsync(data)">
+                                        <i class="c-icon cil-ban"></i>
+                                        <span>Deshabilitar</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-icon btn-success" @onclick="() => ChangeStatusAsync(data)">
+                                        <i class="c-icon cil-check"></i>
+                                        <span>Habilitar</span>
+                                    </button>
+                                }
+                                @*<button class="btn btn-primary" data-target="#edit_modal" data-toggle="modal" @onclick="(() => Edit(data.Id))">Editar</button>*@
+                            </Template>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+<SweetAlert @ref="Alert" Title="¿Está seguro de actualizar el estado del usuario?" ButtonText="Sí, actualizarlo" Type="SweetAlert.DialogType.warning" />
+<SweetAlert @ref="AlertOk" Title="Se actualizó el estado del usuario con éxito" Type="SweetAlert.DialogType.success" />
+<SweetAlert @ref="AlertError" Title="Ha ocurrido un error al tratar de actualizar el estado del usuario" Type="SweetAlert.DialogType.error" />
+
+@code {
+    private RadzenGrid<UserResource> DataGrid;
+    private SweetAlert Alert;
+    private SweetAlert AlertOk;
+    private SweetAlert AlertError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync(false);
+    }
+
+    private async Task LoadDataAsync(bool refresh)
+    {
+        await ViewModel.LoadAsync();
+        if (refresh) StateHasChanged();
+    }
+
+    public async Task ChangeStatusAsync(UserResource user)
+    {
+        if (await Alert.ConfirmTaskAsync())
+        {
+            if(await ViewModel.ChangeStatusAsync(user.Id.Value))
+            {
+                await AlertOk.FireAsync();
+                ToastService.ShowSuccess(user.RawFullName, "Se actualizó el estado del usuario con éxito");
+                await LoadDataAsync(true);
+            }
+            else
+            {
+                await AlertError.FireAsync(ViewModel.ErrorMessage);
+                ToastService.ShowError(user.RawFullName, ViewModel.ErrorMessage);
+            }
+        }
+    }
+
+    public void Export(string type)
+    {
+        //service.Export("OrderDetails", type, new Query() { OrderBy = grid.Query.OrderBy, Filter = grid.Query.Filter });
+    }
+}

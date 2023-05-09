@@ -1,0 +1,49 @@
+﻿@page "/restaurante/nuevo"
+@inject ViewModels.RestaurantViewModels.EditViewModel ViewModel
+@inject IToastService ToastService
+
+<Document Title="Nuevo Restaurante" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3>Nuevo Restaurante</h3>
+            </div>
+            <div class="card-body">
+                @if (ViewModel.Restaurant != null)
+                {
+                    <Form @ref="Form" Restaurant="ViewModel.Restaurant" ValidSubmitCallback="SaveAsync" InvalidSubmitCallback="ShowError" />
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private Form Form;
+
+    protected override void OnInitialized()
+    {
+        ViewModel.Restaurant = new RestaurantResource() { Schedules = new List<ServiceScheduleResource>() };
+    }
+
+    private async Task SaveAsync()
+    {
+        if (await ViewModel.SaveAsync(ViewModel.Restaurant, Form.SelectedFile, Form.FileStream))
+        {
+            ToastService.ShowSuccess(ViewModel.Restaurant.Name, "Información guardada con éxito");
+        }
+        else
+        {
+            ToastService.ShowError(ViewModel.Restaurant.Name, ViewModel.ErrorMessage);
+            await Form.ShowAlertAsync(ViewModel.ErrorMessage);
+        }
+    }
+
+    public void ShowError()
+    {
+        ToastService.ShowError("Se encontraron errores en el formulario", "Error");
+    }
+}

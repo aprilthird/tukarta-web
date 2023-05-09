@@ -1,0 +1,53 @@
+﻿@page "/perfil"
+@inject ViewModels.ProfileViewModels.EditViewModel ViewModel
+@inject IToastService ToastService
+
+<Document Title="Perfil" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3>Datos Personales</h3>
+            </div>
+            <div class="card-body">
+                @if (ViewModel.User != null)
+                {
+                    <TUKARTA.PE.WEB.PANEL.BUSINESS.Pages.User.Form @ref="Form" User="ViewModel.User" ValidSubmitCallback="SaveAsync" InvalidSubmitCallback="ShowError" />
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; }
+
+    private TUKARTA.PE.WEB.PANEL.BUSINESS.Pages.User.Form Form;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        await ViewModel.LoadAsync(user.GetId());
+    }
+
+    private async Task SaveAsync()
+    {
+        if (await ViewModel.SaveAsync(ViewModel.User))
+        {
+            ToastService.ShowSuccess(ViewModel.User.Name, "Información guardada con éxito");
+        }
+        else
+        {
+            ToastService.ShowError(ViewModel.User.Name, ViewModel.ErrorMessage);
+            await Form.ShowAlertAsync(ViewModel.ErrorMessage);
+        }
+    }
+
+    public void ShowError()
+    {
+        ToastService.ShowError("Se encontraron errores en el formulario", "Error");
+    }
+}

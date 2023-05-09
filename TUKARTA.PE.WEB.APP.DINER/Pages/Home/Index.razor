@@ -1,0 +1,27 @@
+﻿@page "/"
+@inject ViewModels.HomeViewModels.IndexViewModel ViewModel
+
+<Document Title="Inicio" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        @*@if (ViewModel.Promotions != null)
+        {
+            <PromotionsDataList LoadPageCallback="ViewModel.LoadAsync" />
+        }*@
+        <PromotionsDataList GetItemsCallback="ViewModel.GetPromotionsAsync" />
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        //await LoadDataAsync(false);
+    }
+
+    //private async Task LoadDataAsync(bool refresh)
+    //{
+    //    await ViewModel.LoadAsync();
+    //    if (refresh) StateHasChanged();
+    //}
+}

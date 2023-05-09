@@ -1,0 +1,26 @@
+﻿<div class="row">
+    <div class="col-md-12">
+        <p>Si no selecciona ninguna fecha, ningún filtro será aplicado.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="name">Inicio</label>
+            <RadzenDatePicker @bind-Value="PurchaseReportParameters.StartDateTime" Placeholder="Inicio" DateFormat="d" Style="width:100%" />
+            <ValidationMessage For="() => PurchaseReportParameters.StartDateTime" />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="name">Fin</label>
+            <RadzenDatePicker @bind-Value="PurchaseReportParameters.EndDateTime" Placeholder="Fin" DateFormat="d" Style="width:100%" />
+            <ValidationMessage For="() => PurchaseReportParameters.EndDateTime" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public PurchaseReportParametersResource PurchaseReportParameters { get; set; }
+}

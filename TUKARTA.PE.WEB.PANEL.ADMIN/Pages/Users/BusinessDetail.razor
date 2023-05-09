@@ -1,0 +1,53 @@
+﻿
+    <RadzenGrid @ref="DataGrid" Data="Restaurants" TItem="RestaurantResource" AllowFiltering="true" AllowSorting="true"
+                AllowPaging="true" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+        <Columns>
+            <RadzenGridColumn TItem="RestaurantResource" Property="LogoUrl" Title="Logo" Sortable="false" Filterable="false">
+                <Template Context="data">
+                    <RadzenImage Path="@data?.LogoUrl?.ToString()" Style="max-width: 100%;" />
+                </Template>
+            </RadzenGridColumn>
+            <RadzenGridColumn TItem="RestaurantResource" Property="Name" Title="Nombre" />
+            <RadzenGridColumn TItem="RestaurantResource" Property="PhoneNumber" Title="Teléfono" />
+            <RadzenGridColumn TItem="RestaurantResource" Property="Email" Title="Correo Electrónico" />
+            <RadzenGridColumn TItem="RestaurantResource" Property="RUC" Title="RUC" />
+            <RadzenGridColumn TItem="RestaurantResource" Property="CreatedAt" Title="Fecha de Creación">
+                <Template Context="data">
+                    @String.Format("{0:d}", data.CreatedAt)
+                </Template>
+            </RadzenGridColumn>
+            <RadzenGridColumn TItem="RestaurantResource" Title="Opciones" Filterable="false" Sortable="false" Width="200px">
+                <Template Context="data">
+                    @if (data.IsEnabled)
+                    {
+                        <button class="btn btn-icon btn-danger" @onclick="() => ChangeStatusAsync(data, false)">
+                            <i class="c-icon cil-ban"></i>
+                            <span>Deshabilitar</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-icon btn-success" @onclick="() => ChangeStatusAsync(data, true)">
+                            <i class="c-icon cil-check"></i>
+                            <span>Habilitar</span>
+                        </button>
+                    }
+                </Template>
+            </RadzenGridColumn>
+        </Columns>
+    </RadzenGrid>
+
+@code {
+    [Parameter]
+    public IEnumerable<RestaurantResource> Restaurants { get; set; }
+
+    [Parameter]
+    public EventCallback<(RestaurantResource, bool)> ChangeStatusCallback { get; set; }
+
+    private RadzenGrid<RestaurantResource> DataGrid;
+
+    public async Task ChangeStatusAsync(RestaurantResource restaurant, bool isEnabled)
+    {
+        await ChangeStatusCallback.InvokeAsync((restaurant, isEnabled));
+    }
+}

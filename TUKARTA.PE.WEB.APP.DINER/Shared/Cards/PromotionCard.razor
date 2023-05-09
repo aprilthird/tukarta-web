@@ -1,0 +1,21 @@
+﻿   
+<div class="card rounded overflow-hidden" style="height:200px;">
+    <div class="background-image">
+        <img src="@Promotion.Dish.PictureUrl" />
+    </div>
+    <div class="bg-black-opacity above-background-image h6 px-2">
+        <div class="my-3 mx-1 d-flex justify-content-between align-items-baseline">
+            <div class="ml-0 mr-2">@Promotion.Dish.Name</div>
+            <div><del>@Promotion.Dish.Price.ToMoney()</del></div>
+            <div>@Promotion.NewPrice.ToMoney()</div>
+            <div class="text-danger">@Promotion.DiscountPercentage.ToPercentage()</div>
+            <div class="text-success">Finaliza el: @Promotion.ExpirationDateTime.ToString("d")</div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public PromotionResource Promotion { get; set; }
+}
+    

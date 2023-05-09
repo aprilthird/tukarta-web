@@ -1,0 +1,95 @@
+﻿
+    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+        <div class="c-sidebar-brand d-lg-down-none">
+            <img src="/img/logos/logo_white.png" height="46" class="c-sidebar-brand-full" alt="TuKarta Logo" />
+            <img src="/img/logos/logo_white_small.png" height="36" class="c-sidebar-brand-minimized" alt="TuKarta Logo" />
+        </div>
+        <ul class="c-sidebar-nav">
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/" Match="NavLinkMatch.All" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-home"></use>
+                    </svg> Home
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-title">Gesti&oacute;n</li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/gestion/categorias-de-platos" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-list"></use>
+                    </svg> Categor&iacute;as
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/gestion/comensales" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/duotone.svg#cid-people"></use>
+                    </svg> Usuarios
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/gestion/usuarios-con-negocio" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/duotone.svg#cid-people-plus"></use>
+                    </svg> Usuarios con Negocio
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/contactos" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/duotone.svg#cid-mail"></use>
+                    </svg> Contactos
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-title">Reportes</li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/reportes/ordenes" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-cart"></use>
+                    </svg> &Oacute;rdenes
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/reportes/reservas" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-clock"></use>
+                    </svg> Reservas
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/reportes/entregas" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-bike"></use>
+                    </svg> Deliveries
+                </NavLink>
+            </li>
+            @*<li class="c-sidebar-nav-title">Usuario</li>
+        <li class="c-sidebar-nav-item">
+            <NavLink class="c-sidebar-nav-link" href="/" Match="NavLinkMatch.All">
+                <svg class="c-sidebar-nav-icon">
+                    <use xlink:href="/assets/icons/svg/solid.svg#cis-user"></use>
+                </svg> Informaci&oacute;n
+            </NavLink>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <NavLink class="c-sidebar-nav-link" href="/" Match="NavLinkMatch.All">
+                <svg class="c-sidebar-nav-icon">
+                    <use xlink:href="/assets/icons/svg/solid.svg#cis-key"></use>
+                </svg> Contrase&ntilde;a
+            </NavLink>
+        </li>*@
+        </ul>
+        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent" data-class="c-sidebar-minimized"></button>
+    </div>
+
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

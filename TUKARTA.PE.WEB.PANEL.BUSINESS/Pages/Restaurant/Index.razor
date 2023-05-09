@@ -1,0 +1,169 @@
+﻿@page "/restaurante"
+
+<Document Title="Restaurante" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="row">
+            <div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/editar">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-edit"></use>
+                            </svg>
+                        </div>
+                        <h4>Editar</h4>
+                    </div>
+                </NavLink>
+            </div>
+            <div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/carta">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-menu-book"></use>
+                            </svg>
+                        </div>
+                        <h4>Carta</h4>
+                    </div>
+                </NavLink>
+            </div>
+            <div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/promociones">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-dish-offer"></use>
+                            </svg>
+                        </div>
+                        <h4>Promociones</h4>
+                    </div>
+                </NavLink>
+            </div>
+            <div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/ordenes">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-order"></use>
+                            </svg>
+                        </div>
+                        <h4>&Oacute;rdenes</h4>
+                    </div>
+                </NavLink>
+            </div>
+            <div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/reservas">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-booking"></use>
+                            </svg>
+                        </div>
+                        <h4>Reservas</h4>
+                    </div>
+                </NavLink>
+            </div>
+            <div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/entregas">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-delivery"></use>
+                            </svg>
+                        </div>
+                        <h4>Delivery</h4>
+                    </div>
+                </NavLink>
+            </div>
+            <div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/ordenes">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-carry-out"></use>
+                            </svg>
+                        </div>
+                        <h4>Para llevar</h4>
+                    </div>
+                </NavLink>
+            </div>
+            @*<div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/mensajes">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-message"></use>
+                            </svg>
+                        </div>
+                        <h4>Mensajes</h4>
+                    </div>
+                </NavLink>
+            </div>*@
+            <div class="col-sm-6 col-md-4 col-xl-3">
+                <NavLink href="/restaurante/calificaciones">
+                    <div class="card text-center">
+                        <div class="px-2 py-3">
+                            <svg class="cil-icon fill-brand-primary w-100">
+                                <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-review"></use>
+                            </svg>
+                        </div>
+                        <h4>Valoraciones</h4>
+                    </div>
+                </NavLink>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<NavLink class="c-sidebar-nav-link" href="/carta" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+    <svg class="c-sidebar-nav-icon">
+        <use xlink:href="/assets/icons/svg/icontest.svg#tkr-test"></use>
+    </svg> Carta
+</NavLink>
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-order"></use>
+</svg> Ordenes
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-booking"></use>
+</svg> Reservas
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-delivery"></use>
+</svg> Deliveries
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-booking-alt"></use>
+</svg> Reservas 2
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-carry-out"></use>
+</svg> Para Llevar
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-menu"></use>
+</svg> Carta
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-review"></use>
+</svg> Valoraciones
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-message"></use>
+</svg> Mensajes
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-edit"></use>
+</svg> Editar
+
+<svg class="c-sidebar-nav-icon">
+    <use xlink:href="/assets/icons/svg/tukarta.svg#tkr-information"></use>
+</svg> Información*@
+
+
+@code {
+
+}

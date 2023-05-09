@@ -1,0 +1,25 @@
+﻿
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="name">Nombre</label>
+            <InputText @bind-Value="MenuCategory.Name" id="name" class="form-control" placeholder="Nombre" />
+            <ValidationMessage For="() => MenuCategory.Name" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="description">Description</label>
+            <InputTextArea @bind-Value="MenuCategory.Description" id="description" class="form-control" placeholder="Descripción" />
+            <ValidationMessage For="() => MenuCategory.Description" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public MenuCategoryResource MenuCategory { get; set; }
+
+}

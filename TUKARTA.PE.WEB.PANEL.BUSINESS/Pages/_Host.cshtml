@@ -1,0 +1,77 @@
+﻿@page "/"
+@namespace TUKARTA.PE.WEB.PANEL.BUSINESS.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="@Url.Content("~/")" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="TuKarta BUSINESS - Panel administrativo de negocios para el sistema de TuKarta">
+    <meta name="author" content="Luis Jeffrey Rojas Montes">
+    <meta name="keyword" content="TuKarta,Servicio,Carta,Restaurantes,Negocios,Panel,Delivery">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    @*<meta name="msapplication-TileImage" content="assets/favicon/ms-icon-144x144.png">*@
+    <meta name="theme-color" content="#F96363">
+
+    <title>Negocios | TuKarta</title>
+
+    <link href="~/css/site.css" rel="stylesheet" />
+
+    <link href="_content/Radzen.Blazor/css/default.css" rel="stylesheet" />
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+
+    <link href="_content/Blazored.Toast/blazored-toast.min.css" rel="stylesheet" />
+    <script src="_content/BlazorInputFile/inputfile.js"></script>
+
+    <link src="https://cdn.jsdelivr.net/npm/sweetalert2@9.17.1/dist/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/lib/ladda/css/ladda-themeless.min.css" rel="stylesheet" />
+
+    <link href="~/assets/css/style.css" rel="stylesheet" />
+    <link href="~/assets/icons/css/free.min.css" rel="stylesheet" />
+    <link href="_content/TUKARTA.PE.WEB.COMPONENTS/styles.css" rel="stylesheet" />
+    <link href="TUKARTA.PE.WEB.PANEL.BUSINESS.styles.css" rel="stylesheet" />
+</head>
+<body>
+
+    <component type="typeof(App)" render-mode="ServerPrerendered" />
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+            Ha ocurrido un error. La aplicaci&oacute;n no responderá hasta que sea recargada.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+            Un error inesperado ha ocurrido. Verifica los detalles en la ventana de herramientas de desarrollo.
+        </environment>
+        <a href="" class="reload">Recargar</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+
+    <environment include="Development">
+        <script src="~/js/hot-reload.js"></script>
+    </environment>
+
+    <script src="_content/TUKARTA.PE.WEB.COMPONENTS/interop.js"></script>
+
+    <!-- CoreUI and necessary plugins-->
+    <script src="~/assets/js/coreui.bundle.min.js"></script>
+    <!--[if IE]><!-->
+    <script src="~/assets/icons/js/svgxuse.min.js"></script>
+    <!--<![endif]-->
+    <!-- Plugins and scripts required by this view-->
+    <script src="~/assets/js/coreui-utils.js"></script>
+    <!-- External Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="~/lib/ladda/js/spin.min.js"></script>
+    <script src="~/lib/ladda/js/ladda.min.js"></script>
+</body>
+</html>

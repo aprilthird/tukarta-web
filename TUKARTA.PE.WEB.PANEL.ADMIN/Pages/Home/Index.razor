@@ -1,0 +1,80 @@
+﻿@page "/"
+@inject ViewModels.HomeViewModels.IndexViewModel ViewModel
+
+<Document Title="Inicio" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <h3>Inicio</h3>
+        <AuthorizeView>
+            <div class="alert alert-brand-gray">
+                Bienvenido <strong>@context.User.Identity.Name</strong>
+            </div>
+        </AuthorizeView>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card p-0 text-white bg-primary">
+                    <div class="card-header font-weight-bold">Usuarios</div>
+                    <div class="card-body">
+                        <h1 class="card-title">@ViewModel.UserCount</h1>
+                        <p class="card-text">Usuarios Registrados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-0 text-white bg-success">
+                    <div class="card-header font-weight-bold">Negocios</div>
+                    <div class="card-body">
+                        <h1 class="card-title">@ViewModel.BusinessCount</h1>
+                        <p class="card-text">Negocios Registrados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-0 text-white bg-info">
+                    <div class="card-header font-weight-bold">Platos</div>
+                    <div class="card-body">
+                        <h1 class="card-title">@ViewModel.DishCount</h1>
+                        <p class="card-text">Platos Registrados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card p-0 text-white bg-brand-third">
+                    <div class="card-header font-weight-bold">Promociones</div>
+                    <div class="card-body">
+                        <h1 class="card-title">@ViewModel.PromotionCount</h1>
+                        <p class="card-text">Promociones Registradas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-0 text-white bg-brand-primary">
+                    <div class="card-header font-weight-bold">Servicios</div>
+                    <div class="card-body">
+                        <h1 class="card-title">@ViewModel.PurchaseCount</h1>
+                        <p class="card-text">Servicios (&oacute;rdenes, reservas y/o delivery) Realizados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-0 text-white bg-instagram">
+                    <div class="card-header font-weight-bold">Valoraciones</div>
+                    <div class="card-body">
+                        <h1 class="card-title">@ViewModel.ReviewCount</h1>
+                        <p class="card-text">Valoraciones Realizadas por Comensales</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code { 
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadAsync();
+    }
+}

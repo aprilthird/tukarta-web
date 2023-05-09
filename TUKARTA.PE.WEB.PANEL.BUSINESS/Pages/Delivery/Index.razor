@@ -1,0 +1,143 @@
+﻿@page "/restaurante/entregas"
+
+@inject ViewModels.DeliveriesViewModels.IndexViewModel ViewModel
+@inject IToastService ToastService
+
+<Document Title="Entregas" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3>Reporte de Entregas</h3>
+            </div>
+            <div class="card-body">
+                <RadzenGrid Data="@ViewModel.Deliveries" TItem="DeliveryResource" AllowSorting="true" AllowFiltering="true"
+                            AllowPaging="true" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" ColumnWidth="120px">
+                    <Columns>
+                        <RadzenGridColumn TItem="DeliveryResource" Property="Code" Title="Código" Width="70px" />
+                        <RadzenGridColumn TItem="DeliveryResource" Property="User.Name" Title="Comensal" Width="100px" />
+                        <RadzenGridColumn TItem="DeliveryResource" Property="Restaurant.Name" Title="Negocio" Width="100px" />
+                        <RadzenGridColumn TItem="DeliveryResource" Property="Status" Title="Estado" Width="100px">
+                            <Template Context="data">
+                                @ConstantHelpers.Service.Status.VALUES[data.Status]
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="DeliveryResource" Property="CreatedAt" Title="Fecha de Creación" Width="120px">
+                            <Template Context="data">
+                                @String.Format("{0:d}", data.CreatedAt)
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="DeliveryResource" Property="Address" Title="Dirección" Width="200px" />
+                        <RadzenGridColumn TItem="DeliveryResource" Title="Opciones" Filterable="false" Sortable="false" Width="230px">
+                            <Template Context="data">
+                                <button class="btn btn-icon btn-brand-secondary btn-sm" @onclick="() => AcceptDeliveryAsync(data)">
+                                    <i class="c-icon cil-restaurant"></i>
+                                    <span>Aprobar</span>
+                                </button>
+                                <button class="btn btn-icon btn-brand-primary btn-sm" @onclick="() => DenyDeliveryAsync(data)">
+                                    <i class="c-icon cil-restaurant"></i>
+                                    <span>Rechazar</span>
+                                </button>
+                                <button class="btn btn-icon btn-brand-third btn-sm" @onclick="() => ShowModalAsync(ModalType.Detail, data)">
+                                    <i class="c-icon cil-restaurant"></i>
+                                    <span>Ver detalle</span>
+                                </button>
+                                @*<button class="btn btn-icon btn-brand-secondary" @onclick="() => ShowModal(ModalType.Edit, data)">
+                                        <i class="c-icon cil-pencil"></i>
+                                        <span>Editar</span>
+                                    </button>
+                                    <button class="btn btn-icon btn-danger" @onclick="() => DeleteAsync(data)">
+                                        <i class="c-icon cil-trash"></i>
+                                        <span>Eliminar</span>
+                                    </button>*@
+                            </Template>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+<Modal @ref="Modal" Title="@ModalTitle" Size="ModalTemplate.ModalSize.ExtraLarge">
+    <DeliveryDetail @ref="Detail" PurchaseDetail="ViewModel.Detail" />
+</Modal>
+
+<SweetAlert @ref="Alert" Title="¿Está seguro de actualizar el estado de la entrega" ButtonText="Sí, actualizarlo" Type="SweetAlert.DialogType.warning" />
+<SweetAlert @ref="AlertOk" Title="Se actualizó el estado con éxito" Type="SweetAlert.DialogType.success" />
+<SweetAlert @ref="AlertError" Title="Ha ocurrido un error al tratar de actualizar el estado" Type="SweetAlert.DialogType.error" />
+@code {
+    [CascadingParameter]
+    RestaurantResource Restaurant { get; set; }
+    
+    private RadzenGrid<DeliveryResource> DataGrid;
+    private Modal Modal;
+    private DeliveryDetail Detail;
+    private string ModalTitle;
+
+    private SweetAlert Alert;
+    private SweetAlert AlertOk;
+    private SweetAlert AlertError;
+
+    public enum ModalType
+    {
+        Detail
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Restaurant != null)
+        {
+            if (Restaurant.Id != ViewModel.RestaurantId)
+            {
+                ViewModel.RestaurantId = Restaurant.Id.Value;
+                await ViewModel.LoadAsync();
+                StateHasChanged();
+            }
+        }
+    }
+
+    public async Task AcceptDeliveryAsync(DeliveryResource delivery)
+    {
+        if (await Alert.ConfirmTaskAsync())
+        {
+            if (await ViewModel.ChangeStatusAsync(delivery.Id.Value, ConstantHelpers.Service.Status.ACCEPTED))
+            {
+                await AlertOk.FireAsync();
+                ToastService.ShowSuccess(delivery.User.RawFullName, "Se aprobo el estado de su entrega con éxito");
+                await ViewModel.LoadAsync();
+            }
+            else
+            {
+                await AlertError.FireAsync(ViewModel.ErrorMessage);
+                ToastService.ShowError(delivery.User.RawFullName, ViewModel.ErrorMessage);
+            }
+        }
+    }
+
+    public async Task DenyDeliveryAsync(DeliveryResource delivery)
+    {
+        if (await Alert.ConfirmTaskAsync())
+        {
+            if (await ViewModel.ChangeStatusAsync(delivery.Id.Value, ConstantHelpers.Service.Status.REJECTED))
+            {
+                await AlertOk.FireAsync();
+                ToastService.ShowSuccess(delivery.User.RawFullName, "Se rechazo el estado de su entrega con éxito");
+                await ViewModel.LoadAsync();
+            }
+            else
+            {
+                await AlertError.FireAsync(ViewModel.ErrorMessage);
+                ToastService.ShowError(delivery.User.RawFullName, ViewModel.ErrorMessage);
+            }
+        }
+    }
+
+    public async Task ShowModalAsync(ModalType modalType, DeliveryResource detail)
+    {
+        ModalTitle = $"Detalles de Entrega";
+        await ViewModel.LoadDetailByDeliveryIdAsync(detail.Id.Value);
+        await Modal.OpenAsync();
+    }
+}

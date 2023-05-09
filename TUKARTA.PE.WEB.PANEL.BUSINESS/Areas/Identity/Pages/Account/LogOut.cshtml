@@ -1,0 +1,22 @@
+﻿@page "/salir"
+@model LogoutModel
+@{
+    ViewData["Title"] = "Has Salido";
+}
+
+<div class="card">
+    <div class="card-body">
+        <h1>@ViewData["Title"]</h1>
+        <p>Se cerr&oacute; la sesi&oacute;n en la aplicaci&oacute;n de forma exitosa.</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            setTimeout(function () {
+                window.location.href = "@Url.Content("~/")";
+            }, 3000);
+        });
+    </script>
+} 

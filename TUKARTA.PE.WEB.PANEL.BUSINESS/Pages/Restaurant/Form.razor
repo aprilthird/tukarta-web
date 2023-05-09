@@ -1,0 +1,418 @@
+﻿@inject IToastService ToastService
+
+    <EditForm @ref="EditForm" EditContext="EditFormContext" OnValidSubmit="OnValidSubmitAsync" OnInvalidSubmit="OnInvalidSubmitAsync">
+        <FluentValidationValidator />
+        <div class="alert alert-danger alert-dismissible fade @AlertDisplayClass" role="alert" style="display:@AlertDisplayCss">
+            <h5 class="alert-heading">Error</h5>
+            <p>@ErrorMessage</p>
+            <button class="close" type="button" @onclick="CloseAlertAsync"><span>×</span></button>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="name">Nombre</label>
+                    <InputText @bind-Value="Restaurant.Name" id="name" class="form-control" placeholder="Nombre" />
+                    <ValidationMessage For="() => Restaurant.Name" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="ruc">RUC</label>
+                    <InputText @bind-Value="Restaurant.RUC" id="ruc" class="form-control" placeholder="RUC" />
+                    <ValidationMessage For="() => Restaurant.RUC" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="email">Correo Electr&oacute;nico</label>
+                    <InputText @bind-Value="Restaurant.Email" id="email" class="form-control" placeholder="Correo Electrónico" />
+                    <ValidationMessage For="() => Restaurant.Email" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="phone_number">Tel&eacute;fono</label>
+                    <InputText @bind-Value="Restaurant.PhoneNumber" id="phone_number" class="form-control" placeholder="Teléfono" />
+                    <ValidationMessage For="() => Restaurant.PhoneNumber" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="enabled_services">Servicios Habilitados</label>
+                    <div class="col-form-label">
+                        <div class="form-check form-check-inline mr-1">
+                            <InputCheckbox @bind-Value="Restaurant.IsOrderEnabled" id="order-checkbox" class="form-check-input" />
+                            <label class="form-check-label" for="order-checkbox">&Oacute;rdenes</label>
+                        </div>
+                        <div class="form-check form-check-inline mr-1">
+                            <InputCheckbox @bind-Value="Restaurant.IsBookingEnabled" id="booking-checkbox" class="form-check-input" />
+                            <label class="form-check-label" for="booking-checkbox">Reservas</label>
+                        </div>
+                        <div class="form-check form-check-inline mr-1">
+                            <InputCheckbox @bind-Value="Restaurant.IsDeliveryEnabled" id="delivery-checkbox" class="form-check-input" />
+                            <label class="form-check-label" for="delivery-checkbox">Delivery</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="commision_price">Comisi&oacute;n (S/)</label>
+                    <InputNumber @bind-Value="Restaurant.CommisionPrice" id="commision_price" class="form-control" placeholder="Comisión" />
+                    <ValidationMessage For="() => Restaurant.CommisionPrice" />
+                </div>
+            </div>
+        </div>*@
+        @if (Restaurant.IsDeliveryEnabled)
+        {
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="kilometers_coverage">Cobertura (km)</label>
+                        <InputNumber @bind-Value="Restaurant.KilometersCoverage" id="kilometers_coverage" class="form-control" placeholder="Cobertura" />
+                        <ValidationMessage For="() => Restaurant.KilometersCoverage" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="estimated_delivery_minutes">Tiempo Estimado de Delivery (min)</label>
+                        <InputNumber @bind-Value="Restaurant.EstimatedDeliveryMinutes" id="estimated_delivery_minutes" class="form-control" placeholder="Minutos Estimados de Delivery" />
+                        <ValidationMessage For="() => Restaurant.EstimatedDeliveryMinutes" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="delivery_cost_per_kilometer">Costo de Env&iacute;o por Kil&oacute;metro (S/ por km)</label>
+                        <InputNumber @bind-Value="Restaurant.DeliveryCostPerKilometer" id="delivery_cost_per_kilometer" class="form-control" placeholder="Costo de Envío por Kilómetro" />
+                        <ValidationMessage For="() => Restaurant.DeliveryCostPerKilometer" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="minimum_amount">Monto M&iacute;nimo (S/)</label>
+                        <InputNumber @bind-Value="Restaurant.MinimumAmount" id="minimum_amount" class="form-control" placeholder="Monto Mínimo" />
+                        <ValidationMessage For="() => Restaurant.MinimumAmount" />
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="service_schedule">Horarios de Servicio</label>
+                    @{
+                        var cultureInfo = new System.Globalization.CultureInfo("es-es");
+                    }
+                    <div class="row mb-1">
+                        <div class="col-6 col-md-2">
+                            <RadzenDatePicker @bind-Value="GlobalOpeningTime" Placeholder="Abre" DateFormat="HH:mm" ShowTime="true" TimeOnly="true" Style="width:100%" />
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <RadzenDatePicker @bind-Value="GlobalClosingTime" Placeholder="Cierra" DateFormat="HH:mm" ShowTime="true" TimeOnly="true" Style="width:100%" />
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-brand-secondary btn-icon" @onclick="SetGlobalScheduleTime">
+                                <i class="cil cil-copy"></i>
+                                &emsp;Establecer Horario para todos los D&iacute;as
+                            </button>
+                        </div>
+                    </div>
+                    @foreach (var daySchedule in Restaurant.Schedules)
+                    {
+                        <div class="row mb-1">
+                            <label class="col-md-2 col-form-label" for="input_schedule_o_@daySchedule.Day">@cultureInfo.DateTimeFormat.GetDayName((DayOfWeek)daySchedule.Day).ToUpper()</label>
+                            <div class="col-md-2 d-flex">
+                                <div class="form-check form-check-inline">
+                                    <RadzenCheckBox @bind-Value="daySchedule.IsClosed" TValue="bool" Change="@(args => UpdateValidatorForSchedule(daySchedule))" />&emsp;Cerrado
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <RadzenDatePicker @bind-Value="daySchedule.OpeningTime" id="@("input_schedule_o_" + daySchedule.Day)" Change="@(args => UpdateValidatorForSchedule(daySchedule))" Disabled="daySchedule.IsClosed" Placeholder="Abre" DateFormat="HH:mm" ShowTime="true" TimeOnly="true" Style="width:100%" />
+                                <ValidationMessage For="() => daySchedule.OpeningTime" />
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <RadzenDatePicker @bind-Value="daySchedule.ClosingTime" id="@("input_schedule_c_" + daySchedule.Day)" Change="@(args => UpdateValidatorForSchedule(daySchedule))" Disabled="daySchedule.IsClosed" Placeholder="Cierra" DateFormat="HH:mm" ShowTime="true" TimeOnly="true" Style="width:100%" />
+                                <ValidationMessage For="() => daySchedule.ClosingTime" />
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <RadzenDatePicker @bind-Value="daySchedule.SecondOpeningTime" id="@("input_schedule_o_" + daySchedule.Day)" Change="@(args => UpdateValidatorForSchedule(daySchedule))" Disabled="daySchedule.IsClosed" Placeholder="Abre" DateFormat="HH:mm" ShowTime="true" TimeOnly="true" Style="width:100%" />
+                                <ValidationMessage For="() => daySchedule.SecondOpeningTime" />
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <RadzenDatePicker @bind-Value="daySchedule.SecondClosingTime" id="@("input_schedule_c_" + daySchedule.Day)" Change="@(args => UpdateValidatorForSchedule(daySchedule))" Disabled="daySchedule.IsClosed" Placeholder="Cierra" DateFormat="HH:mm" ShowTime="true" TimeOnly="true" Style="width:100%" />
+                                <ValidationMessage For="() => daySchedule.SecondClosingTime" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="website_url">Sitio Web (URL)</label>
+                    <InputText @bind-Value="Restaurant.WebSiteUrl" id="website_url" class="form-control" placeholder="Sitio Web (URL)" />
+                    <ValidationMessage For="() => Restaurant.WebSiteUrl" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="image">Logo @(Restaurant.LogoUrl == null ? "" : "(Reemplazar)")</label>
+                    <BlazorInputFile.InputFile OnChange="HandleFileSelected" id="image" class="form-control" placeholder="Imagen" />
+                    <ValidationMessage For="() => Restaurant.LogoUrl" />
+                    @if (SelectedFile != null)
+                    {
+                        var progress = (100.0 * SelectedFile.Data.Position / SelectedFile.Size).ToString("0");
+                        <div class="progress mt-1">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @progress%">@progress%</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="story">Historia</label>
+                    <InputTextArea @bind-Value="Restaurant.Story" id="story" class="form-control" placeholder="Historia" />
+                    <ValidationMessage For="() => Restaurant.Story" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Ubicaci&oacute;n (Mueve el mapa y haz click para posicionar el marcador)</label>
+                    <Radzen.Blazor.RadzenGoogleMap @ref="GoogleMap" MapClick="MapClick" Zoom="15" Center="Position" ApiKey="AIzaSyBeORmvV-Uc7LvTsShyRpqQ6uJQ7Fy15D0" Style="height: 300px;">
+                        <Markers>
+                            <Radzen.Blazor.RadzenGoogleMapMarker @ref="MapMarker" Title="Restaurante" Label="Restaurante" Position="Position" />
+                        </Markers>
+                    </Radzen.Blazor.RadzenGoogleMap>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="address">Direcci&oacute;n (Se actualiza autom&aacute;ticamente posicionando el marcador)</label>
+                    <InputText @bind-Value="Restaurant.Address" id="address" class="form-control" placeholder="Dirección" readonly />
+                    <ValidationMessage For="() => Restaurant.Address" />
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-sm-12 d-flex justify-content-end">
+                <Button @ref="SubmitButton" Text="Guardar" Icon="c-icon cil-save" />
+            </div>
+        </div>
+    </EditForm>
+
+<GeoLocation @ref="GeoLocation" />
+<Geocoder @ref="Geocoder" />
+
+@code {
+    [Parameter]
+    public RestaurantResource Restaurant { get; set; }
+
+    [Parameter]
+    public EventCallback ValidSubmitCallback { get; set; }
+
+    [Parameter]
+    public EventCallback InvalidSubmitCallback { get; set; }
+
+    public GoogleMapPosition Position { get; set; }
+    public BlazorInputFile.IFileListEntry SelectedFile { get; set; }
+    public System.IO.Stream FileStream { get; set; }
+
+    private string ErrorMessage = null;
+    private string AlertDisplayClass = "hide";
+    private string AlertDisplayCss = "none;";
+
+    private DateTime GlobalOpeningTime = new DateTime().AddHours(8);
+    private DateTime GlobalClosingTime = new DateTime().AddHours(23);
+
+    private EditForm EditForm;
+    private EditContext EditFormContext;
+    //private FluentValidationValidator Validator;
+    private Button SubmitButton;
+    private GeoLocation GeoLocation;
+    private Geocoder Geocoder;
+    private RadzenGoogleMap GoogleMap;
+    private RadzenGoogleMapMarker MapMarker;
+
+    protected override void OnInitialized()
+    {
+        Position = new GoogleMapPosition() { Lat = Restaurant.Latitude, Lng = Restaurant.Longitude };
+        EditFormContext = new EditContext(Restaurant.Schedules);
+        if (Restaurant.Schedules == null)
+        {
+            Restaurant.Schedules = new List<ServiceScheduleResource>();
+        }
+        if (!Restaurant.Schedules.Any())
+        {
+            Restaurant.Schedules.AddRange(
+                Enumerable.Range((int)DayOfWeek.Sunday, (int)DayOfWeek.Saturday + 1)
+                .Select(x => new ServiceScheduleResource
+                {
+                    Day = x,
+                    OpeningTime = new DateTime().AddHours(8),
+                    ClosingTime = new DateTime().AddHours(23),
+                    IsClosed = false
+                }));
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Restaurant != null && Position != null)
+        {
+            if (Position.Lat != Restaurant.Latitude || Position.Lng != Restaurant.Longitude)
+            {
+                await UpdateMapPosition(Restaurant.Latitude, Restaurant.Longitude);
+            }
+        }
+    }
+
+    private void SetGlobalScheduleTime()
+    {
+        foreach (var daySchedule in Restaurant.Schedules)
+        {
+            daySchedule.OpeningTime = GlobalOpeningTime;
+            daySchedule.ClosingTime = GlobalClosingTime;
+            daySchedule.SecondOpeningTime = null;
+            daySchedule.SecondClosingTime = null;
+            UpdateValidatorForSchedule(daySchedule);
+        }
+    }
+
+    private void UpdateValidatorForSchedule(ServiceScheduleResource daySchedule)
+    {
+        var fieldIdentifier1 = new FieldIdentifier(daySchedule, "OpeningTime");
+        var fieldIdentifier2 = new FieldIdentifier(daySchedule, "ClosingTime");
+        var fieldIdentifier3 = new FieldIdentifier(daySchedule, "SecondOpeningTime");
+        var fieldIdentifier4 = new FieldIdentifier(daySchedule, "SecondClosingTime");
+        EditFormContext.NotifyFieldChanged(fieldIdentifier1);
+        EditFormContext.NotifyFieldChanged(fieldIdentifier2);
+        EditFormContext.NotifyFieldChanged(fieldIdentifier3);
+        EditFormContext.NotifyFieldChanged(fieldIdentifier4);
+    }
+
+    private async Task HandleFileSelected(BlazorInputFile.IFileListEntry[] files)
+    {
+        await SubmitButton.ShowLoaderAsync();
+        SelectedFile = files.FirstOrDefault();
+        SelectedFile.OnDataRead += (sender, eventArgs) => InvokeAsync(StateHasChanged);
+
+        FileStream = new System.IO.MemoryStream();
+        await SelectedFile.Data.CopyToAsync(FileStream);
+        FileStream.Seek(0, System.IO.SeekOrigin.Begin);
+        await SubmitButton.HideLoaderAsync();
+    }
+
+    private async Task MapClick(GoogleMapClickEventArgs args)
+    {
+        await UpdateMapPosition(args.Position.Lat, args.Position.Lng);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (!Restaurant.Id.HasValue)
+            {
+                if (GeoLocation.Response.IsEnabled)
+                {
+                    if (!GeoLocation.Response.HasError)
+                    {
+                        await UpdateMapPosition(GeoLocation.Response.Latitude, GeoLocation.Response.Longitude);
+                    }
+                    else
+                    {
+                        ToastService.ShowError($"Error al obtener su posición. Código de Error: {GeoLocation.Response.ErrorCode}", GeoLocation.Response.ErrorMessage);
+                    }
+                }
+                else
+                {
+                    ToastService.ShowWarning($"Habilítelas en su navegador para una mejor experiencia.", "Las funciones de geolocalización se encuentran deshabilitadas");
+                }
+            }
+        }
+    }
+
+    private async Task UpdateMapPosition(double latitude, double longitude)
+    {
+        Position = new GoogleMapPosition() { Lat = latitude, Lng = longitude };
+        Restaurant.Latitude = Position.Lat;
+        Restaurant.Longitude = Position.Lng;
+        await Geocoder.RequestAsync(Position.Lat, Position.Lng);
+        if (Geocoder.Response.IsEnabled)
+        {
+            if (!Geocoder.Response.HasError)
+            {
+                if (Geocoder.Response.Found)
+                {
+                    Restaurant.Address = Geocoder.Response.Address;
+                }
+                else
+                {
+                    ToastService.ShowError($"Por favor seleccione otro punto del mapa.", "No se encontró una dirección válida para dicho punto del mapa.");
+                }
+            }
+            else
+            {
+                ToastService.ShowError($"Ocurrió un error al intentar obtener la dirección del punto del mapa.", Geocoder.Response.ErrorMessage);
+            }
+        }
+        else
+        {
+            ToastService.ShowError($"Google Maps Geocode API no encontrado.", "Las funciones de geocodificación de direcciones no se encuentran activadas.");
+        }
+    }
+
+    public async Task OnValidSubmitAsync()
+    {
+        await SubmitButton.ShowLoaderAsync();
+        await ValidSubmitCallback.InvokeAsync(this);
+        await SubmitButton.HideLoaderAsync();
+    }
+
+    private async Task OnInvalidSubmitAsync()
+    {
+        await InvalidSubmitCallback.InvokeAsync(this);
+    }
+
+    public async Task ShowAlertAsync(string message)
+    {
+        ErrorMessage = message;
+        AlertDisplayCss = "block;";
+        await Task.Delay(500);
+        AlertDisplayClass = "show";
+    }
+
+    public async Task CloseAlertAsync()
+    {
+        ErrorMessage = null;
+        AlertDisplayClass = "hide";
+        await Task.Delay(1000);
+        AlertDisplayCss = "none;";
+    }
+}

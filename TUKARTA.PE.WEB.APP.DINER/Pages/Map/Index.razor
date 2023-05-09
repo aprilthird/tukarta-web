@@ -1,0 +1,71 @@
+﻿@page "/mapa"
+@inject IToastService ToastService
+
+@inject ViewModels.MapViewModels.IndexViewModel ViewModel
+
+<Document Title="Mapa" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <Radzen.Blazor.RadzenGoogleMap @ref="GoogleMap" MapClick="MapClick" Zoom="15" Center="Position" ApiKey="@ConstantHelpers.ApiKey.GOOGLE_MAPS_API_KEY" Style="height: 600px;">
+            <Markers>
+                <Radzen.Blazor.RadzenGoogleMapMarker @ref="MapMarker" Title="Restaurante" Label="Restaurante" Position="Position" />
+                @if (ViewModel.Restaurants != null)
+                {
+                    foreach (var restaurant in ViewModel.Restaurants)
+                    {
+                        <Radzen.Blazor.RadzenGoogleMapMarker @ref="MapMarker" Title="@restaurant.Name" Label="@restaurant.Name" Position="@(new GoogleMapPosition() { Lat = restaurant.Latitude, Lng = restaurant.Longitude})" />
+                    }
+                }
+            </Markers>
+        </Radzen.Blazor.RadzenGoogleMap>
+    </div>
+</div>
+
+<GeoLocation @ref="GeoLocation" />
+
+@code {
+    public GoogleMapPosition Position { get; set; }
+
+    private GeoLocation GeoLocation;
+    private Geocoder Geocoder;
+    private RadzenGoogleMap GoogleMap;
+    private RadzenGoogleMapMarker MapMarker;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadAsync();
+    }
+
+    private async Task MapClick(GoogleMapClickEventArgs args)
+    {
+        await UpdateMapPosition(args.Position.Lat, args.Position.Lng);
+    }
+
+    private async Task UpdateMapPosition(double latitude, double longitude)
+    {
+        Position = new GoogleMapPosition() { Lat = latitude, Lng = longitude };
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (GeoLocation.Response.IsEnabled)
+            {
+                if (!GeoLocation.Response.HasError)
+                {
+                    await UpdateMapPosition(GeoLocation.Response.Latitude, GeoLocation.Response.Longitude);
+                }
+                else
+                {
+                    ToastService.ShowError($"Error al obtener su posición. Código de Error: {GeoLocation.Response.ErrorCode}", GeoLocation.Response.ErrorMessage);
+                }
+            }
+            else
+            {
+                ToastService.ShowWarning($"Habilítelas en su navegador para una mejor experiencia.", "Las funciones de geolocalización se encuentran deshabilitadas");
+            }
+        }
+    }
+}

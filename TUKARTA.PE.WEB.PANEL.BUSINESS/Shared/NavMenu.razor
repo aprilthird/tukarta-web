@@ -1,0 +1,131 @@
+﻿@inject BusinessService BusinessService
+
+<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+    <div class="c-sidebar-brand d-lg-down-none">
+        <img src="/img/logos/logo_white.png" height="46" class="c-sidebar-brand-full" alt="TuKarta Logo" />
+        <img src="/img/logos/logo_white_small.png" height="36" class="c-sidebar-brand-minimized" alt="TuKarta Logo" />
+    </div>
+    <ul class="c-sidebar-nav">
+        <li class="c-sidebar-nav-item">
+            <NavLink class="c-sidebar-nav-link" href="/" Match="NavLinkMatch.All" ActiveClass="c-active">
+                <svg class="c-sidebar-nav-icon">
+                    <use xlink:href="/assets/icons/svg/free.svg#cil-home"></use>
+                </svg> Home
+            </NavLink>
+        </li>
+        @if (Restaurant != null)
+        {
+            <li class="c-sidebar-nav-item c-sidebar-nav-item-flex">
+                <NavLink class="c-sidebar-nav-link" href="/restaurante" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <img src="@Restaurant.LogoUrl" alt="restaurant logo" class="mr-2" /> @Restaurant.Name
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-title">Productos</li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/restaurante/carta" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-restaurant"></use>
+                    </svg> Carta
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/restaurante/promociones" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-tags"></use>
+                    </svg> Promociones
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-title">Servicios</li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/restaurante/ordenes" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-cart"></use>
+                    </svg> &Oacute;rdenes
+                    @if (PendingOrders != 0)
+                    {
+                        <span class="badge badge-brand-secondary">@PendingOrders</span>
+                    }
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/restaurante/reservas" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-clock"></use>
+                    </svg> Reservas
+                    @if (PendingBookings != 0)
+                    {
+                        <span class="badge badge-brand-secondary">@PendingBookings</span>
+                    }
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/restaurante/entregas" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-bike"></use>
+                    </svg> Deliveries
+                    @if (PendingDeliveries != 0)
+                    {
+                        <span class="badge badge-brand-secondary">@PendingDeliveries</span>
+                    }
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-title">Clientes</li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/restaurante/valoraciones" Match="NavLinkMatch.Prefix" ActiveClass="c-active">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/free.svg#cil-star"></use>
+                    </svg> Valoraciones
+                </NavLink>
+            </li>
+            @*<li class="c-sidebar-nav-title">Usuario</li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/" Match="NavLinkMatch.All">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/solid.svg#cis-user"></use>
+                    </svg> Informaci&oacute;n
+                </NavLink>
+            </li>
+            <li class="c-sidebar-nav-item">
+                <NavLink class="c-sidebar-nav-link" href="/" Match="NavLinkMatch.All">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="/assets/icons/svg/solid.svg#cis-key"></use>
+                    </svg> Contrase&ntilde;a
+                </NavLink>
+            </li>*@
+        }
+    </ul>
+    <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent" data-class="c-sidebar-minimized"></button>
+</div>
+
+
+@code {
+    private bool collapseNavMenu = true;
+    private int PendingOrders;
+    private int PendingBookings;
+    private int PendingDeliveries;
+    private Guid CurrentRestaurantId;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    [CascadingParameter]
+    private RestaurantResource Restaurant { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(Restaurant != null)
+        {
+            if(CurrentRestaurantId != Restaurant.Id)
+            {
+                CurrentRestaurantId = Restaurant.Id.Value;
+                PendingOrders = await BusinessService.GetPendingOrdersCount(CurrentRestaurantId);
+                PendingBookings = await BusinessService.GetPendingBookingsCount(CurrentRestaurantId);
+                PendingDeliveries = await BusinessService.GetPendingDeliveriesCount(CurrentRestaurantId);
+            }
+        }
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

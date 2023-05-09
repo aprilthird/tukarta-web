@@ -1,0 +1,74 @@
+﻿@page "/"
+@inject ViewModels.HomeViewModels.IndexViewModel ViewModel
+
+<Document Title="Inicio" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <h3>Inicio</h3>
+        @{
+            var restaurantCount = ViewModel.Restaurants != null ? ViewModel.Restaurants.Count() : 0;
+        }
+        <AuthorizeView>
+            <div class="alert alert-brand-gray">
+                Bienvenido <strong>@context.User.GetRawFullName()</strong>. Usted tiene actualmente <strong>@restaurantCount negocios</strong> creados.
+            </div>
+        </AuthorizeView>
+        <div class="d-flex justify-content-end mb-3">
+            <NavLink href="/restaurante/nuevo" class="btn btn-icon btn-brand-primary">
+                <i class="c-icon cil-plus"></i>
+                <span>Nuevo Negocio</span>
+            </NavLink>
+        </div>
+        <div class="row">
+            @if (ViewModel.Restaurants != null)
+            {
+                @foreach (var restaurant in ViewModel.Restaurants)
+                {
+                    var maxMediumSize = 12 / (restaurantCount > 1 ? 2 : restaurantCount);
+                    var maxLargeSize = 12 / (restaurantCount > 2 ? 3 : restaurantCount);
+                    <div class="col-md-@maxMediumSize col-lg-@maxLargeSize">
+                        <div class="card">
+                            <div class="row">
+                                <div class="col-sm-4 col-md-12 col-xl-6">
+                                    <div class="overflow-hidden" style="height: 200px; background-image: url(@restaurant.LogoUrl); background-position: center; background-size: cover">
+                                        @*<img src="@restaurant.LogoUrl" alt="restaurant logo" class="img-fluid" />*@
+                                    </div>
+                                </div>
+                                <div class="col-sm-8 col-md-12 col-xl-6">
+                                    <div class="card-body p-3 d-flex align-items-center">
+                                        <div>
+                                            <div class="text-value text-brand-primary">@restaurant.Name</div>
+                                            <div class="text-value text-brand-secondary">RUC: @restaurant.RUC</div>
+                                            <div class="text-value text-brand-third">@restaurant.Address</div>
+                                            <div class="text-muted @*text-uppercase font-weight-bold*@ small">@restaurant.Story</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer px-3 py-2">
+                                <a class="btn-block d-flex justify-content-between align-items-center" href="#">
+                                    <span class="small font-weight-bold">Ver M&aacute;s</span>
+                                    <svg class="c-icon">
+                                        <use xlink:href="/assets/icons/svg/free.svg#cil-chevron-right"></use>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        await ViewModel.LoadAsync(user.GetId());
+    }
+}

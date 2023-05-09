@@ -1,0 +1,85 @@
+﻿@inherits LayoutComponentBase
+
+@inject ISessionStorageService sessionStorage
+@inject NavigationManager NavigationManager
+@inject BusinessService BusinessService
+
+@using Blazored.Toast.Configuration
+
+<CascadingValue Value="Restaurant">
+    <CascadingValue Value="BusinessList">
+        <div class="c-app">
+            <NavMenu />
+
+            <div class="c-wrapper c-fixed-components">
+                <TopBarMenu OnRestaurantChange="ChangeRestaurantAsync" />
+                <div class="c-body">
+                    <main class="c-main">
+                        @Body
+                    </main>
+                    <footer class="c-footer">
+                        <div><a href="https://tukarta.com">TuKarta</a> &copy; @DateTime.UtcNow.Year</div>
+                        <div class="ml-auto">Powered by&nbsp;<a href="https://tukarta.com/">TuKarta</a></div>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </CascadingValue>
+</CascadingValue>
+
+<BlazoredToasts Position="ToastPosition.BottomRight"
+                Timeout="10"
+                IconType="IconType.FontAwesome"
+                ErrorIcon="cil-thumb-down"
+                InfoIcon="cil-info"
+                SuccessIcon="cil-thumb-up"
+                WarningIcon="cil-warning" />
+
+@code {
+    private RestaurantResource Restaurant { get; set; }
+
+    private IEnumerable<RestaurantResource> BusinessList = new List<RestaurantResource>();
+
+    [CascadingParameter]
+    Task<AuthenticationState> AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            //User.redirectUrl = uriHelper.GetAbsoluteUri();
+            var redirectUrl = $"{NavigationManager.BaseUri}{ConstantHelpers.Route.LOGIN}";
+            NavigationManager.NavigateTo(redirectUrl);
+        }
+        else
+        {
+            BusinessList = await BusinessService.GetBusinessForUserAsync(user.GetId());
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Restaurant == null && BusinessList.Any())
+        {
+            var restaurantId = await sessionStorage.GetItemAsync<Guid?>("restaurant_id");
+            if (restaurantId.HasValue)
+            {
+                Restaurant = BusinessList.FirstOrDefault(x => x.Id == restaurantId.Value);
+            }
+            else if (BusinessList.Any())
+            {
+                Restaurant = BusinessList.FirstOrDefault();
+                await sessionStorage.SetItemAsync("restaurant_id", Restaurant.Id);
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task ChangeRestaurantAsync(Guid restaurantId)
+    {
+        await sessionStorage.SetItemAsync("restaurant_id", restaurantId);
+        Restaurant = BusinessList.FirstOrDefault(x => x.Id == restaurantId);
+    }
+}

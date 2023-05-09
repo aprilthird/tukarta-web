@@ -1,0 +1,86 @@
+﻿@page "/ingresar"
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<div class="card-group">
+    <div class="card p-md-4 mb-0">
+        <div class="card-body">
+            <form id="login_form" method="post">
+                <h1>@ViewBag.Title</h1>
+                <p class="text-muted">Ingresa con tus credenciales</p>
+                <div id="signin_errors" class="alert alert-danger" style="display: @(!Html.ViewData.ModelState.IsValid ? "block" : "none")">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="c-icon cil-user"></i>
+                        </span>
+                    </div>
+                    <input asp-for="Input.Email" class="form-control" required>
+                </div>
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="c-icon cil-lock-locked"></i>
+                        </span>
+                    </div>
+                    <input asp-for="Input.Password" class="form-control" required>
+                </div>
+                @*<div class="mb-2">
+                    <a id="forgot-password" asp-page="./ForgotPassword" href="#">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>*@
+                <button class="btn btn-icon btn-brand-primary ladda-button float-right" data-style="zoom-out" type="submit">
+                    <span class="ladda-label">
+                        <i class="c-icon cil-exit-to-app"></i>
+                        <span>Ingresar</span>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let submitted = false;
+        let laddaBtn = Ladda.create($("#login_form button[type='submit']")[0]);
+        var form = $("#login_form").validate({
+            messages: {
+                "Input.Email": {
+                    required: "El campo 'Correo Electrónico' es obligatorio.",
+                    email: "El campo 'Correo Electrónico' no es un correo válido."
+                },
+                "Input.Password": "El campo 'Contraseña' es obligatorio."
+            },
+            submitHandler: function (formElement, e) {
+                $("#signin_errors").hide();
+                laddaBtn.start();
+                e.preventDefault();
+                formElement.submit();
+            },
+            showErrors: function (errorMap, errorList) {
+                if (submitted) {
+                    var summary = "El formulario presenta los siguientes errores: <br/><ul>";
+                    $.each(errorList, function (i) { summary += "<li id='" + errorList[i].element.id + "_Error'>" + this.message + " " + "</li>"; });
+                    summary += "</ul>"
+                    $("#signin_errors").html(summary);
+                    $("#signin_errors").show();
+                    submitted = false;
+                }
+            },
+            invalidHandler: function (form, validator) {
+                submitted = true;
+            },
+            success: function (label, elem) {
+                alert(elem.id);
+                $(`#${elem.id}_Error`).html("");
+            }
+        });
+    </script>
+}

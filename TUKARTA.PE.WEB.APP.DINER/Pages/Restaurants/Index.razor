@@ -1,0 +1,18 @@
+﻿@page "/restaurantes"
+@inject ViewModels.RestaurantsViewModels.IndexViewModel ViewModel
+@inject NavigationManager NavigationManager
+
+<Document Title="Restaurantes" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <RestaurantsDataList GetItemsCallback="ViewModel.GetRestaurantsAsync" OnClickItemCallback="NavigateToRestaurantDetails" />
+    </div>
+</div>
+
+@code {
+    private void NavigateToRestaurantDetails(RestaurantResource restaurant)
+    {
+        NavigationManager.NavigateTo($"{NavigationManager.BaseUri}restaurante/{restaurant.Id}");
+    }
+}

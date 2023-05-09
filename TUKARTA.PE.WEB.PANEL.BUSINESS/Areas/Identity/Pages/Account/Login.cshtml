@@ -1,0 +1,116 @@
+﻿@page "/ingresar"
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+@section Styles {
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
+}
+
+<div class="card-group">
+    <div class="card p-md-4 mb-0">
+        <div class="card-body">
+            <form id="login_form" method="post">
+                <h1>@ViewBag.Title</h1>
+                <p class="text-muted">Ingresa con tus credenciales</p>
+                <div id="signin_errors" class="alert alert-danger" style="display: @(!Html.ViewData.ModelState.IsValid ? "block" : "none")">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="c-icon cil-user"></i>
+                        </span>
+                    </div>
+                    <input asp-for="Input.Email" class="form-control" required>
+                </div>
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="c-icon cil-lock-locked"></i>
+                        </span>
+                    </div>
+                    <input asp-for="Input.Password" class="form-control" required>
+                </div>
+                @*<div class="mb-2">
+                    <a id="forgot-password" asp-page="./ForgotPassword" href="#">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>*@
+                <button class="btn btn-icon btn-brand-primary ladda-button float-right" data-style="zoom-out" type="submit">
+                    <span class="ladda-label">
+                        <i class="c-icon cil-exit-to-app"></i>
+                        <span>Ingresar</span>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="card text-white bg-brand-primary p-md-4">
+        <div class="card-body text-center">
+            <div>
+                <h3 class="d-none d-sm-block">¿No tienes una cuenta?</h3>
+                <div class="mb-1 d-none d-sm-block">&Uacute;nete a nosotros para gestionar tus &oacute;rdenes, pedidos para llevar, reservas y delivery de forma m&aacute;s r&aacute;pida y eficiente.</div>
+                <a class="btn btn-brand-secondary mb-1" href="/registro">¡Reg&iacute;strate Ahora!</a>
+                @if (Model.ExternalLogins.Any())
+                {
+                    <div class="mb-1">o usa otros servicios</div>
+                    <form method="post" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl">
+                        @foreach (var provider in Model.ExternalLogins)
+                        {
+                            @*<button type="submit" class="btn btn-brand-secondary mb-1"  title="Ingresa con @provider.DisplayName">@provider.DisplayName</button>*@
+                            if (provider.Name == "Google")
+                            {
+                                <button type="submit" name="provider" value="@provider.Name" class="firebaseui-idp-button mdl-button mdl-js-button mdl-button--raised firebaseui-idp-google firebaseui-id-idp-button" data-provider-id="google.com" style="background-color:#ffffff" data-upgraded=",MaterialButton">
+                                    <span class="firebaseui-idp-icon-wrapper"><img class="firebaseui-idp-icon" alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"></span>
+                                    <span class="firebaseui-idp-text firebaseui-idp-text-long">Ingresa con Google</span><span class="firebaseui-idp-text firebaseui-idp-text-short">Google</span>
+                                </button>
+                            }
+                        }
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let submitted = false;
+        let laddaBtn = Ladda.create($("#login_form button[type='submit']")[0]);
+        var form = $("#login_form").validate({
+            messages: {
+                "Input.Email": {
+                    required: "El campo 'Correo Electrónico' es obligatorio.",
+                    email: "El campo 'Correo Electrónico' no es un correo válido."
+                },
+                "Input.Password": "El campo 'Contraseña' es obligatorio."
+            },
+            submitHandler: function (formElement, e) {
+                $("#signin_errors").hide();
+                laddaBtn.start();
+                e.preventDefault();
+                formElement.submit();
+            },
+            showErrors: function (errorMap, errorList) {
+                if (submitted) {
+                    var summary = "El formulario presenta los siguientes errores: <br/><ul>";
+                    $.each(errorList, function (i) { summary += "<li id='" + errorList[i].element.id + "_Error'>" + this.message + " " + "</li>"; });
+                    summary += "</ul>"
+                    $("#signin_errors").html(summary);
+                    $("#signin_errors").show();
+                    submitted = false;
+                }
+            },
+            invalidHandler: function (form, validator) {
+                submitted = true;
+            },
+            success: function (label, elem) {
+                alert(elem.id);
+                $(`#${elem.id}_Error`).html("");
+            }
+        });
+    </script>
+}

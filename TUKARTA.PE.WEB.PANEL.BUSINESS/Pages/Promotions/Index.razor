@@ -1,0 +1,169 @@
+﻿@page "/restaurante/promociones"
+@inject ViewModels.PromotionsViewModels.IndexViewModel ViewModel
+@inject IToastService ToastService
+
+<Document Title="Promociones" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3>Promociones</h3>
+                <button class="btn btn-icon btn-brand-primary" @onclick="() => ShowModalAsync(ModalType.New)">
+                    <i class="c-icon cil-library-add"></i>
+                    <span>Nueva Promoci&oacute;n</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <RadzenGrid Data="@ViewModel.Promotions" TItem="PromotionResource" AllowSorting="true" AllowFiltering="true"
+                            AllowPaging="true" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" ColumnWidth="120px">
+                    <Columns>
+                        <RadzenGridColumn TItem="PromotionResource" Property="Dish.Name" Title="Plato" />
+                        <RadzenGridColumn TItem="PromotionResource" Property="ExpirationDateTime" Title="Fecha de Creación">
+                            <Template Context="data">
+                                @String.Format("{0:d}", data.ExpirationDateTime)
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="PromotionResource" Property="NewPrice" Title="Monto">
+                            <Template Context="data">
+                                @data.NewPrice.ToMoney()
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="PromotionResource" Title="Opciones" Filterable="false" Sortable="false">
+                            <Template Context="data">
+                                <button class="btn btn-icon btn-brand-secondary" @onclick="() => ShowModalAsync(ModalType.Edit, data)">
+                                    <i class="c-icon cil-pencil"></i>
+                                    <span>Editar</span>
+                                </button>
+                                @if (data.IsEnabled)
+                                {
+                                    <button class="btn btn-icon btn-danger" @onclick="() => ChangeStatusAsync(data)">
+                                        <i class="c-icon cil-ban"></i>
+                                        <span>Deshabilitar</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-icon btn-success" @onclick="() => ChangeStatusAsync(data)">
+                                        <i class="c-icon cil-check"></i>
+                                        <span>Habilitar</span>
+                                    </button>
+                                }
+                            </Template>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ModalForm @ref="Modal" Title="@ModalTitle" Model="ModalPromotion" ValidSubmitCallback="SaveAsync" InvalidSubmitCallback="ShowError">
+    <Fields @ref="Fields" Promotion="ModalPromotion" Dishes="ViewModel.Dishes"/>
+</ModalForm>
+
+<SweetAlert @ref="Alert" Title="¿Está seguro de cambiar el estado de la promoción?" Message="Esta acción es irreversible" ButtonText="Sí, cambiarlo" Type="SweetAlert.DialogType.warning" />
+<SweetAlert @ref="AlertOk" Title="Se cambio el estado de la promoción con éxito" Type="SweetAlert.DialogType.success" />
+<SweetAlert @ref="AlertError" Title="Ha ocurrido un error al tratar de eliminar la promoción" Type="SweetAlert.DialogType.error" />
+@code {
+    [CascadingParameter]
+    private RestaurantResource Restaurant { get; set; }
+
+    private PromotionResource ModalPromotion = new PromotionResource();
+
+    private RadzenGrid<PromotionResource> DataGrid;
+
+    private ModalForm Modal;
+    private Fields Fields;
+    private string ModalTitle;
+
+    private SweetAlert Alert;
+    private SweetAlert AlertOk;
+    private SweetAlert AlertError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadDishesAsync();
+    }
+
+    public enum ModalType
+    {
+        New, Edit
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Restaurant != null)
+        {
+            if (Restaurant.Id != ViewModel.RestaurantId)
+            {
+                ViewModel.RestaurantId = Restaurant.Id.Value;
+                await ViewModel.LoadAsync();
+                StateHasChanged();
+            }
+        }
+    }
+
+    public async Task ShowModalAsync(ModalType modalType, PromotionResource promotion = null)
+    {
+        ModalTitle = $"{(modalType == ModalType.New ? "Nueva" : "Editar")} Promoción";
+        ModalPromotion = promotion ?? new PromotionResource();
+        await Modal.OpenAsync();
+    }
+
+    public async Task SaveAsync()
+    {
+        if (await ViewModel.SaveAsync(ModalPromotion))
+        {
+            ToastService.ShowSuccess("", "Registro guardado con éxito");
+            await ViewModel.LoadAsync();
+            await Modal.CloseAsync();
+        }
+        else
+        {
+            ToastService.ShowError("", ViewModel.ErrorMessage);
+            await Modal.ShowAlertAsync(ViewModel.ErrorMessage);
+        }
+    }
+
+    public async Task ChangeStatusAsync(PromotionResource promotion)
+    {
+        if (await Alert.ConfirmTaskAsync())
+        {
+            if (await ViewModel.ChangeStatusAsync(promotion.Id.Value))
+            {
+                await AlertOk.FireAsync();
+                ToastService.ShowSuccess(promotion.Dish.Name, "Se actualizó el estado de la promoción con éxito");
+                await ViewModel.LoadAsync();
+            }
+            else
+            {
+                await AlertError.FireAsync(ViewModel.ErrorMessage);
+                ToastService.ShowError(promotion.Dish.Name, ViewModel.ErrorMessage);
+            }
+        }
+    }
+
+    public async Task DeleteAsync(PromotionResource promotion)
+    {
+        if (await Alert.ConfirmTaskAsync())
+        {
+            if (await ViewModel.DeleteAsync(promotion.Id.Value))
+            {
+                await AlertOk.FireAsync();
+                ToastService.ShowSuccess(promotion.Dish.Name, "Se eliminó la promoción con éxito");
+                await ViewModel.LoadAsync();
+            }
+            else
+            {
+                await AlertError.FireAsync(ViewModel.ErrorMessage);
+                ToastService.ShowError(promotion.Dish.Name, ViewModel.ErrorMessage);
+            }
+        }
+    }
+
+    public void ShowError()
+    {
+        ToastService.ShowError("Se encontraron errores en el formulario", "Error");
+    }
+}

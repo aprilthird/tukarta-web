@@ -1,0 +1,17 @@
+﻿@page "/promociones"
+@inject ViewModels.PromotionsViewModels.IndexViewModel ViewModel
+
+<Document Title="Promociones" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadAsync();
+    }
+}

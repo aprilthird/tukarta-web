@@ -1,0 +1,66 @@
+﻿@typeparam TItem
+
+@if (PageList != null)
+{
+    <p class="mt-2">Mostrando @PageList.Count() resultados...</p>
+    <div class="row">
+        @foreach (var item in PageList)
+        {
+        <div class="col-md-6">
+            @ChildContent(item)
+        </div>
+        }
+    </div>
+}
+
+@if (!AllShown)
+{
+    <div class="d-flex justify-content-center my-2">
+        <Button @ref="SeeMoreButton" Text="Ver Más" Icon="c-icon cil-chevron-bottom" OnClickCallback="SeeMore" Theme="Button.ButtonTheme.OutlineBrandPrimary" />
+    </div>
+}
+
+@code {
+    [Parameter]
+    public RenderFragment<TItem> ChildContent { get; set; }
+
+    [Parameter]
+    public Func<PaginationParameters, bool, Task<IEnumerable<TItem>>> GetItemsCallback { get; set; }
+
+    [Parameter]
+    public int ResultsPerPage { get; set; } = ConstantHelpers.Pagination.DEFAULT_RESULTS_PER_PAGE;
+
+    public bool AllShown { get; set; } = false;
+    public Button SeeMoreButton { get; set; }
+
+    private IEnumerable<TItem> PageList { get; set; }
+    private PaginationParameters PaginationParameters { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PaginationParameters = new PaginationParameters
+        {
+            Page = 1,
+            Limit = ResultsPerPage
+        };
+        PageList = await GetItemsCallback.Invoke(PaginationParameters, true);
+        PaginationParameters.Page++;
+    }
+
+    private async Task SeeMore()
+    {
+        await SeeMoreButton.ShowLoaderAsync();
+        var newPageList = await GetItemsCallback.Invoke(PaginationParameters, true);
+        if (!newPageList.Any())
+            AllShown = true;
+        else
+        {
+            PageList = PageList.Concat(newPageList);
+            PaginationParameters.Page++;
+            if (newPageList.Count() < ResultsPerPage)
+                AllShown = true;
+            StateHasChanged();
+        }
+        await SeeMoreButton.HideLoaderAsync();
+    }
+}

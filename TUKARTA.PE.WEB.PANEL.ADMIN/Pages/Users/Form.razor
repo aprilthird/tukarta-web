@@ -1,0 +1,105 @@
+﻿<EditForm Model="User" OnValidSubmit="OnValidSubmitAsync" OnInvalidSubmit="OnInvalidSubmitAsync">
+    <FluentValidationValidator />
+    <div class="alert alert-danger alert-dismissible fade @AlertDisplayClass" role="alert" style="display:@AlertDisplayCss">
+        <h5 class="alert-heading">Error</h5>
+        <p>@ErrorMessage</p>
+        <button class="close" type="button" @onclick="CloseAlertAsync"><span>×</span></button>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="name">Nombre</label>
+                <InputText @bind-Value="User.Name" id="name" class="form-control" placeholder="Nombre" />
+                <ValidationMessage For="() => User.Name" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="description">Apellidos</label>
+                <InputText @bind-Value="User.Surname" id="description" class="form-control" placeholder="Apellidos" />
+                <ValidationMessage For="() => User.Surname" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="description">Fecha de Nacimiento</label>
+                <RadzenDatePicker @bind-Value="User.BirthDate" id="description" placeholder="Fecha de Nacimiento" DateFormat="d" Style="width:100%" />
+                <ValidationMessage For="() => User.BirthDate" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="description">Email</label>
+                <InputText @bind-Value="User.Email" id="description" class="form-control" placeholder="Email" />
+                <ValidationMessage For="() => User.Email" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="description">Numero de Telefono</label>
+                <InputText @bind-Value="User.PhoneNumber" id="description" class="form-control" placeholder="Numero de Telefono" />
+                <ValidationMessage For="() => User.PhoneNumber" />
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    <div class="row">
+        <div class="col-sm-12 d-flex justify-content-end">
+            <Button @ref="SubmitButton" Text="Guardar" Icon="c-icon cil-save" />
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public UserResource User { get; set; }
+
+    [Parameter]
+    public EventCallback ValidSubmitCallback { get; set; }
+
+    [Parameter]
+    public EventCallback InvalidSubmitCallback { get; set; }
+
+    private string ErrorMessage = null;
+    private string AlertDisplayClass = "hide";
+    private string AlertDisplayCss = "none;";
+
+    private Button SubmitButton;
+
+    public async Task OnValidSubmitAsync()
+    {
+        await SubmitButton.ShowLoaderAsync();
+        await ValidSubmitCallback.InvokeAsync(this);
+        await SubmitButton.HideLoaderAsync();
+    }
+
+    private async Task OnInvalidSubmitAsync()
+    {
+        await InvalidSubmitCallback.InvokeAsync(this);
+    }
+
+    public async Task ShowAlertAsync(string message)
+    {
+        ErrorMessage = message;
+        AlertDisplayCss = "block;";
+        await Task.Delay(500);
+        AlertDisplayClass = "show";
+    }
+
+    public async Task CloseAlertAsync()
+    {
+        ErrorMessage = null;
+        AlertDisplayClass = "hide";
+        await Task.Delay(1000);
+        AlertDisplayCss = "none;";
+    }
+}

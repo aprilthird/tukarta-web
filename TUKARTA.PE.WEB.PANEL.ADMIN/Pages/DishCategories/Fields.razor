@@ -1,0 +1,62 @@
+﻿<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="name">Nombre</label>
+            <InputText @bind-Value="DishCategory.Name" id="name" class="form-control" placeholder="Nombre" />
+            <ValidationMessage For="() => DishCategory.Name" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="description">Description</label>
+            <InputTextArea @bind-Value="DishCategory.Description" id="description" class="form-control" placeholder="Descripción" />
+            <ValidationMessage For="() => DishCategory.Description" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="image">Imagen @(DishCategory.PictureUrl == null ? "" : "(Reemplazar)")</label>
+            <BlazorInputFile.InputFile OnChange="HandleFileSelected" id="image" class="form-control" placeholder="Imagen" />
+            <ValidationMessage For="() => DishCategory.PictureUrl" />
+        </div>
+        @if (SelectedFile != null)
+        {
+            var progress = (100.0 * SelectedFile.Data.Position / SelectedFile.Size).ToString("0");
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @progress%">@progress%</div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public DishCategoryResource DishCategory { get; set; }
+
+    [Parameter]
+    public EventCallback BeforeFileUpload { get; set; }
+
+    [Parameter]
+    public EventCallback AfterFileUpload { get; set; }
+
+    public BlazorInputFile.IFileListEntry SelectedFile { get; set; }
+    public System.IO.Stream FileStream { get; set; }
+
+    private async Task HandleFileSelected(BlazorInputFile.IFileListEntry[] files)
+    {
+        //SubmitButton.IsEnabled = false;
+        await BeforeFileUpload.InvokeAsync(this);
+        SelectedFile = files.FirstOrDefault();
+        SelectedFile.OnDataRead += (sender, eventArgs) => InvokeAsync(StateHasChanged);
+
+        FileStream = new System.IO.MemoryStream();
+        await SelectedFile.Data.CopyToAsync(FileStream);
+        FileStream.Seek(0, System.IO.SeekOrigin.Begin);
+        await AfterFileUpload.InvokeAsync(this);
+        //SubmitButton.IsEnabled = true;
+    }
+}

@@ -1,0 +1,59 @@
+﻿@page "/contactos"
+
+@inject ViewModels.ContactViewModels.IndexViewModel ViewModel
+@inject IToastService ToastService
+
+<Document Title="Contactos" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3>Contactos</h3>
+            </div>
+            <div class="card-body">
+                <RadzenGrid @ref="DataGrid" TItem="ContactResource" AllowSorting="true" AllowFiltering="true"
+                            AllowPaging="true" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" ColumnWidth="200px">
+                    <Columns>
+                        <RadzenGridColumn TItem="ContactResource" Property="ResponsibleName" Title="Responsable" />
+                        <RadzenGridColumn TItem="ContactResource" Property="BusinessName" Title="Negocio" />
+                        <RadzenGridColumn TItem="ContactResource" Property="Email" Title="Correo Electrónico" />
+                        <RadzenGridColumn TItem="ContactResource" Property="PhoneNumber" Title="Teléfono" />
+                        <RadzenGridColumn TItem="ContactResource" Property="CreatedAt" Title="Fecha de Envío">
+                            <Template Context="data">
+                                @String.Format("{0:d}", data.CreatedAt)
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="ContactResource" Title="Opciones" Filterable="false" Sortable="false">
+                            <Template Context="data">
+                                @*<button class="btn btn-icon btn-brand-secondary" @onclick="() => ShowModal(ModalType.Edit, data)">
+                                        <i class="c-icon cil-pencil"></i>
+                                        <span>Editar</span>
+                                    </button>
+                                    <button class="btn btn-icon btn-danger" @onclick="() => DeleteAsync(data)">
+                                        <i class="c-icon cil-trash"></i>
+                                        <span>Eliminar</span>
+                                    </button>*@
+                            </Template>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RadzenGrid<ContactResource> DataGrid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync(false);
+    }
+
+    private async Task LoadDataAsync(bool refresh)
+    {
+        await ViewModel.LoadAsync();
+        if (refresh) StateHasChanged();
+    }
+}

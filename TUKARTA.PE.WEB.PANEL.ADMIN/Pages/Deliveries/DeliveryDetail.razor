@@ -1,0 +1,45 @@
+﻿<RadzenGrid @ref="DataGrid" Data="PurchaseDetail" TItem="PurchaseDetailResource" AllowFiltering="true" AllowSorting="true"
+            AllowPaging="true" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+    <Columns>
+        <RadzenGridColumn TItem="PurchaseDetailResource" Property="OriginalPrice" Title="Precio" Width="100px">
+            <Template Context="data">
+                @if (data.PromotionId.HasValue)
+                {
+                @data.OriginalPrice?.ToMoney()
+
+                }
+                else
+                {
+                @data.UnitPrice.ToMoney()
+                }
+            </Template>
+        </RadzenGridColumn>
+        <RadzenGridColumn TItem="PurchaseDetailResource" Property="Promotion" Title="Descuento" Width="150px">
+            <Template Context="data">
+                @if (data.PromotionId.HasValue)
+                {
+                <div>@data.Discount.ToPercentage()</div>
+
+                }
+                else
+                {
+                <div>No Tiene Descuento</div>
+                }
+            </Template>
+        </RadzenGridColumn>
+        <RadzenGridColumn TItem="PurchaseDetailResource" Property="CreatedAt" Title="Fecha de Creación" Width="120px">
+            <Template Context="data">
+                @String.Format("{0:d}", data.CreatedAt)
+            </Template>
+        </RadzenGridColumn>
+        <RadzenGridColumn TItem="PurchaseDetailResource" Property="Quantity" Title="Cantidad" Width="100px" />
+        <RadzenGridColumn TItem="PurchaseDetailResource" Property="Description" Title="Descripcion" Width="250px" />
+    </Columns>
+</RadzenGrid>
+
+@code {
+    [Parameter]
+    public IEnumerable<PurchaseDetailResource> PurchaseDetail { get; set; }
+
+    private RadzenGrid<PurchaseDetailResource> DataGrid;
+}

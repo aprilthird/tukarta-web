@@ -1,0 +1,128 @@
+﻿@page "/reportes/ordenes"
+
+@inject ViewModels.OrdersViewModels.IndexViewModel ViewModel
+@inject IToastService ToastService
+
+<Document Title="Órdenes" />
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3>Reporte de &Oacute;rdenes</h3>
+                <button class="btn btn-icon btn-brand-primary" @onclick="() => ShowModalAsync(ModalType.Report)">
+                    <i class="c-icon cil-file"></i>
+                    <span>Reporte</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <RadzenGrid Data="@ViewModel.Orders" TItem="OrderResource" AllowSorting="true" AllowFiltering="true"
+                            AllowPaging="true" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" ColumnWidth="120px">
+                    <Columns>
+                        <RadzenGridColumn TItem="OrderResource" Property="Code" Title="Código" Width="70px" />
+                        <RadzenGridColumn TItem="OrderResource" Property="User.Name" Title="Comensal" Width="100px" />
+                        <RadzenGridColumn TItem="OrderResource" Property="Restaurant.Name" Title="Negocio" Width="100px" />
+                        <RadzenGridColumn TItem="OrderResource" Property="Status" Title="Estado" Width="100px">
+                            <FilterTemplate>
+                                <RadzenDropDown @bind-Value="currentFilter" AllowClear="true" TextProperty="Text" ValueProperty="Value" Style="width:100%"
+                                                Data="@(ConstantHelpers.Service.Status.VALUES.Select(t => new { Text = t.Value, Value = t.Key }))" />
+                            </FilterTemplate>
+                            <Template Context="data">
+                                @ConstantHelpers.Service.Status.VALUES[data.Status]
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="OrderResource" Property="CreatedAt" Title="Fecha de Creación" Width="120px">
+                            <Template Context="data">
+                                @String.Format("{0:d}", data.CreatedAt)
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="OrderResource" Property="Total" Title="Monto" Width="80px">
+                            <Template Context="data">
+                                S/. @data.Total.ToString("0.00")
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="OrderResource" Title="Opciones" Filterable="false" Sortable="false" Width="220px">
+                            <Template Context="data">
+                                <button class="btn btn-icon btn-brand-third btn-sm" @onclick="() => ShowModalAsync(ModalType.Detail, data)">
+                                    <i class="c-icon cil-paper-plane"></i>
+                                    <span>Ver detalle</span>
+                                </button>
+                            </Template>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+<Modal @ref="ModalDetail" Title="@ModalDetailsTitle" Size="ModalTemplate.ModalSize.ExtraLarge">
+    <OrderDetail @ref="Detail" PurchaseDetail="ViewModel.Detail" />
+</Modal>
+
+<ModalForm @ref="ModalReportGeneration" Title="@ModalReportTitle" Model="ModalPurchaseReportParameters" ValidSubmitCallback="GenerateReportAsync">
+    <OrderReportFields PurchaseReportParameters="ModalPurchaseReportParameters" />
+</ModalForm>
+
+<SweetAlert @ref="Alert" Title="¿Está seguro de actualizar el estado de la orden" ButtonText="Sí, actualizarlo" Type="SweetAlert.DialogType.warning" />
+<SweetAlert @ref="AlertOk" Title="Se actualizó el estado con éxito" Type="SweetAlert.DialogType.success" />
+<SweetAlert @ref="AlertError" Title="Ha ocurrido un error al tratar de actualizar el estado" Type="SweetAlert.DialogType.error" />
+
+<SaveAsFile @ref="SaveAsFile" />
+
+@code {
+    [CascadingParameter]
+    RestaurantResource Restaurant { get; set; }
+
+    private PurchaseReportParametersResource ModalPurchaseReportParameters = new PurchaseReportParametersResource();
+
+    private RadzenGrid<OrderResource> DataGrid;
+    private Modal ModalDetail;
+    private ModalForm ModalReportGeneration;
+    private OrderDetail Detail;
+    private string ModalDetailsTitle;
+    private string ModalReportTitle;
+    private int currentFilter = 0;
+    private SaveAsFile SaveAsFile;
+
+    private SweetAlert Alert;
+    private SweetAlert AlertOk;
+    private SweetAlert AlertError;
+
+    public enum ModalType
+    {
+        Detail,
+        Report
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        await ViewModel.LoadAsync();
+    }
+
+    public async Task ShowModalAsync(ModalType modalType, OrderResource detail = null)
+    {
+        if (modalType == ModalType.Detail)
+        {
+            ModalDetailsTitle = $"Detalles de Orden";
+            await ViewModel.LoadDetailByOrderIdAsync(detail.Id.Value);
+            await ModalDetail.OpenAsync();
+        }
+        else
+        {
+            ModalReportTitle = $"Generación de Reporte";
+            await ModalReportGeneration.OpenAsync();
+        }
+    }
+
+    public async Task GenerateReportAsync()
+    {
+        var fileString = await ViewModel.GetReportFileString(ModalPurchaseReportParameters);
+        await SaveAsFile.SaveAsync("REPORTE DE ORDENES.xlsx", "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,", fileString);
+    }
+}

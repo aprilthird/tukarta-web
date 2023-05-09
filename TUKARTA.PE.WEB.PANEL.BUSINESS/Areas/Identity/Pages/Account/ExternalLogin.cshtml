@@ -1,0 +1,26 @@
+﻿@page "/ingreso-externo"
+@model ExternalLoginModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+@section Styles {
+    <link href="_content/Radzen.Blazor/css/default.css" rel="stylesheet" />
+    <link href="_content/Blazored.Toast/blazored-toast.min.css" rel="stylesheet" />
+    <link src="https://cdn.jsdelivr.net/npm/sweetalert2@9.17.1/dist/sweetalert2.min.css" rel="stylesheet" />
+}
+
+@*<p id="external-login-description" class="text-info">
+    You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
+    Please enter an email address for this site below and click the Register button to finish
+    logging in.
+</p>*@
+
+<component type="typeof(TUKARTA.PE.WEB.PANEL.BUSINESS.Pages.User.ExternalRegister)" param-ProviderName="Model.ProviderDisplayName" param-Email="Model.ExternalLoginInfo.Email" param-Name="Model.ExternalLoginInfo.Name" param-Surname="Model.ExternalLoginInfo.Surname" param-PhoneNumber="Model.ExternalLoginInfo.PhoneNumber" render-mode="ServerPrerendered" />
+
+@section Scripts {
+    <script src="_framework/blazor.server.js"></script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+    <script src="_content/BlazorInputFile/inputfile.js"></script>
+    <script src="_content/TUKARTA.PE.WEB.COMPONENTS/interop.js"></script>
+}

@@ -1,0 +1,95 @@
+﻿@inject ViewModels.UserViewModels.ExternalRegisterViewModel ViewModel
+@inject IToastService ToastService
+@using System.Security.Claims
+ 
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h3>Registro</h3>
+    </div>
+    <div class="card-body">
+        @if (ShowSuccessMessage)
+        {
+            <div class="alert alert-success fade @ShowClass" role="alert">
+                <h4 class="alert-heading">¡Registro realizado con &eacute;xito!</h4>
+                <p>Si los datos son correctos el administrador habilitar&aacute; su cuenta para que pueda ingresar al sistema y empezar a gestionar sus negocios. Un cordial saludo.</p>
+                <hr />
+                <div class="d-flex justify-content-end">
+                    <a href="/ingresar" class="btn btn-icon btn-success"><i class="c-icon cil-home"></i><span>Regresar al Inicio</span></a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading">¡Solo un paso m&aacute;s!</h4>
+                <p>Hemos identificado que es la primera vez que ingresas a TuKarta con esta cuenta de <strong>@ProviderName</strong>. Por favor, ingrese o modifique los siguientes datos personales para terminar su registro en el sistema.</p>
+            </div>
+            if (ViewModel.User != null)
+            {
+                <Form @ref="Form" User="ViewModel.User" ValidSubmitCallback="SaveAsync" InvalidSubmitCallback="ShowError" ReturnToLogin="true" />
+            }
+        }
+    </div>
+</div>
+
+<BlazoredToasts Position="Blazored.Toast.Configuration.ToastPosition.BottomRight"
+                Timeout="10"
+                IconType="IconType.FontAwesome"
+                ErrorIcon="cil-thumb-down"
+                InfoIcon="cil-info"
+                SuccessIcon="cil-thumb-up"
+                WarningIcon="cil-warning" />
+
+@code {
+    [Parameter]
+    public string ProviderName { get; set; }
+
+    [Parameter]
+    public string Email { get; set; }
+
+    [Parameter]
+    public string Name { get; set; }
+
+    [Parameter]
+    public string Surname { get; set; }
+
+    [Parameter]
+    public string PhoneNumber { get; set; }
+
+    private Form Form;
+    private bool ShowSuccessMessage = false;
+    private string ShowClass = "";
+
+    protected override void OnInitialized()
+    {
+        ViewModel.User = new UserResource() 
+        { 
+            IsExternalLogin = true, 
+            Email = Email, 
+            Name = Name, 
+            Surname = Surname, 
+            PhoneNumber = PhoneNumber 
+        };
+    }
+
+    private async Task SaveAsync()
+    {
+        if (await ViewModel.SaveAsync(ViewModel.User))
+        {
+            ToastService.ShowSuccess(ViewModel.User.Email, "Información guardada con éxito");
+            ShowSuccessMessage = true;
+            await Task.Delay(1000);
+            ShowClass = "show";
+        }
+        else
+        {
+            ToastService.ShowError(ViewModel.User.Email, ViewModel.ErrorMessage);
+            await Form.ShowAlertAsync(ViewModel.ErrorMessage);
+        }
+    }
+
+    public void ShowError()
+    {
+        ToastService.ShowError("Se encontraron errores en el formulario", "Error");
+    }
+}

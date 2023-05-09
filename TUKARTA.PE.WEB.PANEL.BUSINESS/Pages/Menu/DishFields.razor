@@ -1,0 +1,80 @@
+﻿@using BlazorInputFile
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="name">Nombre</label>
+            <InputText @bind-Value="Dish.Name" id="name" class="form-control" placeholder="Nombre" />
+            <ValidationMessage For="() => Dish.Name" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="dish_category">Categoria</label>
+            <RadzenDropDown @bind-Value="Dish.DishCategoryId" id="dish_category" TValue="Guid" Data="DishCategories" TextProperty="Name" ValueProperty="Id" class="form-control" Placeholder="Categoría" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            <ValidationMessage For="() => Dish.DishCategoryId" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="price">Precio</label>
+            <InputNumber @bind-Value="Dish.Price" id="price" class="form-control" placeholder="Precio" />
+            <ValidationMessage For="() => Dish.Price" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="description">Description</label>
+            <InputTextArea @bind-Value="Dish.Description" id="description" class="form-control" placeholder="Descripción" />
+            <ValidationMessage For="() => Dish.Description" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="image">Imagen @(Dish.PictureUrl == null ? "" : "(Reemplazar)")</label>
+            <BlazorInputFile.InputFile OnChange="HandleFileSelected" id="image" class="form-control" placeholder="Imagen" />
+            <ValidationMessage For="() => Dish.PictureUrl" />
+        </div>
+        @if (SelectedFile != null)
+        {
+            var progress = (100.0 * SelectedFile.Data.Position / SelectedFile.Size).ToString("0");
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @progress%">@progress%</div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public IEnumerable<DishCategoryResource> DishCategories { get; set; }
+    [Parameter]
+    public DishResource Dish { get; set; }
+    [Parameter]
+    public EventCallback BeforeFileUpload { get; set; }
+    [Parameter]
+    public EventCallback AfterFileUpload { get; set; }
+
+    public IFileListEntry SelectedFile { get; set; }
+    public System.IO.Stream FileStream { get; set; }
+
+    private async Task HandleFileSelected(IFileListEntry[] files)
+    {
+        await BeforeFileUpload.InvokeAsync(this);
+        SelectedFile = files.FirstOrDefault();
+        SelectedFile.OnDataRead += (sender, eventArgs) => InvokeAsync(StateHasChanged);
+
+        FileStream = new System.IO.MemoryStream();
+        await SelectedFile.Data.CopyToAsync(FileStream);
+        FileStream.Seek(0, System.IO.SeekOrigin.Begin);
+        await AfterFileUpload.InvokeAsync(this);
+    }
+}
